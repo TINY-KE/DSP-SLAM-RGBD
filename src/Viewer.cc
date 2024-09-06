@@ -26,9 +26,9 @@
 namespace ORB_SLAM2
 {
 
-Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, ObjectDrawer *pObjectDrawer, Tracking *pTracking, const string &strSettingPath):
+Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, MapPublisher*  pMapPublisher, ObjectDrawer *pObjectDrawer, Tracking *pTracking, const string &strSettingPath):
     mpSystem(pSystem), mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpObjectDrawer(pObjectDrawer), mpTracker(pTracking),
-    mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
+    mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false),mpMapPublisher(pMapPublisher)
 {
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
@@ -105,6 +105,8 @@ void Viewer::Run()
 
     while(1)
     {
+        mpMapPublisher->Refresh();
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         mpMapDrawer->GetCurrentOpenGLCameraMatrix(Twc);
@@ -147,14 +149,15 @@ void Viewer::Run()
         if(menuShowPoints)
             mpMapDrawer->DrawMapPoints();
 
-        mpObjectDrawer->ProcessNewObjects();
-        mpObjectDrawer->DrawObjects(bFollow, Tec);
+        mpObjectDrawer->ProcessNewObjects();   //每次可视化只能处理一个物体，尽管优于刷新频率很快，可能对可视化效果影响不大。
+        mpObjectDrawer->DrawObjects(bFollow, Tec);   //绘制物体。其中Tec代表?
+        mpObjectDrawer->DrawNBV(bFollow, Tec);   //绘制物体。其中Tec代表?
 
         pangolin::FinishFrame();
 
         cv::Mat im = GetFrame();
 //        double scale = float(w) / im.size().width;
-//        cv::Mat scaled_im;
+//        cv::Mat scaled_im;LocalMapping_util.cc
 //        cv::resize(im, scaled_im, cv::Size(0, 0), scale, scale);
         cv::imshow("DSP-SLAM: Current Frame", im);
         cv::waitKey(mT);

@@ -206,6 +206,10 @@ private:
     cv::Mat mtcw;
     cv::Mat mRwc;
     cv::Mat mOw; //==mtwc
+
+public: // active dsp
+    cv::Mat mGroundtruthPose_mat;           // camera groundtruth.
+
 };
 
 }// namespace ORB_SLAM

@@ -22,17 +22,82 @@
 #include"KeyFrame.h"
 #include"Frame.h"
 #include"Map.h"
+#include "Candidate.h"
+//[zhjd]
+#include <pybind11/embed.h>
+#include <pybind11/eigen.h>
+namespace py = pybind11;
 
 namespace ORB_SLAM2 {
 
 class KeyFrame;
 class Map;
 class Frame;
+//class LocalMapping;
+
+struct Cuboid3D{
+        //     7------6
+        //    /|     /|
+        //   / |    / |
+        //  4------5  |
+        //  |  3---|--2
+        //  | /    | /
+        //  0------1
+        // lenth ：corner_2[0] - corner_1[0]
+        // width ：corner_2[1] - corner_3[1]
+        // height：corner_2[2] - corner_6[2]
+
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    public:
+        // 8 vertices.
+        Eigen::Vector3f corner_1;
+        Eigen::Vector3f corner_2;
+        Eigen::Vector3f corner_3;
+        Eigen::Vector3f corner_4;
+        Eigen::Vector3f corner_5;
+        Eigen::Vector3f corner_6;
+        Eigen::Vector3f corner_7;
+        Eigen::Vector3f corner_8;
+
+        // 8 vertices (without rotation).
+        Eigen::Vector3f corner_1_w;
+        Eigen::Vector3f corner_2_w;
+        Eigen::Vector3f corner_3_w;
+        Eigen::Vector3f corner_4_w;
+        Eigen::Vector3f corner_5_w;
+        Eigen::Vector3f corner_6_w;
+        Eigen::Vector3f corner_7_w;
+        Eigen::Vector3f corner_8_w;
+
+        Eigen::Vector3f cuboidCenter;       // the center of the Cube, not the center of mass of the object
+        float x_min, x_max, y_min, y_max, z_min, z_max;     // the boundary in XYZ direction.
+
+        float lenth;
+        float width;
+        float height;
+        float mfRMax;      // 中心点与角点的最大半径
+
+        //g2o::SE3Quat pose ;                               // 6 dof pose.
+        cv::Mat pose_mat = cv::Mat::eye(4, 4, CV_32F);      //cv::mat形式的 物体在世界坐标系下的位姿
+        //g2o::SE3Quat pose_without_yaw;                    // 6 dof pose without rotation.
+        cv::Mat pose_noyaw_mat = cv::Mat::eye(4, 4, CV_32F);
+        // angle.
+        float rotY = 0.0;
+        float rotP = 0.0;
+        float rotR = 0.0;
+
+        // line.
+        float mfErrorParallel;
+        float mfErroeYaw;
+};
+
 
 class MapObject {
 public:
-    MapObject(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode, KeyFrame *pRefKF, Map *pMap);
-    MapObject(KeyFrame *pRefKF, Map *pMap);
+    MapObject(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode, const py::object& pyOptimizer, KeyFrame *pRefKF, Map *pMap );
+    MapObject(const py::object& pyOptimizer, KeyFrame *pRefKF, Map *pMap);
 
     void AddObservation(KeyFrame *pKF, int idx);
     int Observations();
@@ -40,7 +105,7 @@ public:
     void SetObjectPoseSim3(const Eigen::Matrix4f &Two);
     void SetObjectPoseSE3(const Eigen::Matrix4f &Two);
     void SetShapeCode(const Eigen::Vector<float, 64> &code);
-    void UpdateReconstruction(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode);
+    void UpdateReconstruction_foronlymono(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode);
     Eigen::Matrix4f GetPoseSim3();
     Eigen::Matrix4f GetPoseSE3();
     Eigen::Vector<float, 64> GetShapeCode();
@@ -53,11 +118,11 @@ public:
     bool IsInKeyFrame(KeyFrame *pKF);
     KeyFrame* GetReferenceKeyFrame();
 
-    std::vector<MapPoint*> GetMapPointsOnObject();
-    void AddMapPoints(MapPoint *pMP);
+    std::vector<MapPoint*> GetMapPointsOnObject_foronlymono();
+    void AddMapPoints_foronlymono(MapPoint *pMP);
     void RemoveOutliersSimple();
     void RemoveOutliersModel();
-    void ComputeCuboidPCA(bool updatePose);
+    void ComputeCuboidPCA_onlyformono(bool updatePose);
     void EraseMapPoint(MapPoint *pMP);
 
     void SetRenderId(int id);
@@ -97,7 +162,7 @@ public:
     Eigen::Matrix4f mTwoGBA;
 
     bool reconstructed;
-    std::set<MapPoint*> map_points;
+    std::set<MapPoint*> map_points_foronlymono;
 
     // cuboid
     float w;
@@ -124,6 +189,17 @@ public:
         return pMO1->mnId < pMO2->mnId;
     }
 
+public:
+    py::object pyOptimizer;
+
+    double mdSdfLoss;
+    void compute_sdf_loss_of_all_inside_points();
+    double compute_sdf_loss(double x, double y, double z);
+
+    void compute_NBV();
+    NBV* nbv;
+    Cuboid3D mCuboid3D;
+    void updateCuboid3D();
 };
 
 }

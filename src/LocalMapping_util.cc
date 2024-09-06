@@ -81,7 +81,7 @@ void LocalMapping::MapObjectCulling()
     }
 }
 
-void LocalMapping::GetNewObservations()
+void LocalMapping::GetNewObservations_onyforStereo()
 {
     PyThreadStateLock PyThreadLock;
 
@@ -100,12 +100,12 @@ void LocalMapping::GetNewObservations()
             continue;
 
         auto pMO = mvpAssociatedObjects[i];
-        if (pMO)
+        if (pMO)  //【zhjd】如果是数据关联成功的物体
         {
-            // Tco obtained by transforming Two to camera frame
+            // Tco obtained by transforming Two to camera frame 【zhjd】当前相机到物体的初始变换
             Eigen::Matrix4f iniSE3Tco = Tcw * pMO->GetPoseSE3();
             g2o::SE3Quat Tco = Converter::toSE3Quat(iniSE3Tco);
-            // Tco after running ICP, use Tco provided by detector
+            // Tco after running ICP, use Tco provided by detector  【zhjd】更新了当前的观测后，当前相机到物体的新变换
             Eigen::Matrix4f SE3Tco = pyOptimizer.attr("estimate_pose_cam_obj")
                     (det->SE3Tco, pMO->scale, det->SurfacePoints, pMO->GetShapeCode()).cast<Eigen::Matrix4f>();
             g2o::SE3Quat Zco = Converter::toSE3Quat(SE3Tco);
@@ -123,7 +123,7 @@ void LocalMapping::GetNewObservations()
                 pMO->SetVelocity(speed);
             }
             else // associated with a static object
-            {
+            {   //如果发生的偏差很小，则认为是真的.
                 if (dist2D.norm() < 1.0 && e.norm() < 1.5) // if the change of translation is very small, then it really is a static object
                 {
                     det->SetPoseMeasurementSE3(SE3Tco);
@@ -153,13 +153,13 @@ void LocalMapping::GetNewObservations()
     }
 }
 
-void LocalMapping::CreateNewMapObjects()
+void LocalMapping::CreateNewMapObjects_foronlyStereo()
 {
     PyThreadStateLock PyThreadLock;
 
     // cout << "LocalMapping: Started new objects creation" << endl;
 
-    auto SE3Twc = Converter::toMatrix4f(mpCurrentKeyFrame->GetPoseInverse());
+    auto SE3Twc = Converter::toMatrix4f(mpCurrentKeyFrame->GetPoseInverse());   
     auto mvpObjectDetections = mpCurrentKeyFrame->GetObjectDetections();
 
     for (int i = 0; i < mvpObjectDetections.size(); i++)
@@ -176,7 +176,9 @@ void LocalMapping::CreateNewMapObjects()
             continue;
         if (!det->isNew)
             continue;
-        auto pyMapObject = pyOptimizer.attr("reconstruct_object")
+
+        // 【创建新物体】pyMapObject是新的物体观测，需要创建为新物体。
+        auto pyMapObject = pyOptimizer.attr("reconstruct_object")   
                 (det->Sim3Tco, det->SurfacePoints, det->RayDirections, det->DepthObs);
         if (!pyMapObject.attr("is_good").cast<bool>())
             continue;
@@ -187,18 +189,19 @@ void LocalMapping::CreateNewMapObjects()
         auto Sim3Tco = pyMapObject.attr("t_cam_obj").cast<Eigen::Matrix4f>();
         det->SetPoseMeasurementSim3(Sim3Tco);
         // Sim3, SE3, Sim3
-        Eigen::Matrix4f Sim3Two = SE3Twc * Sim3Tco;
+        Eigen::Matrix4f Sim3Two = SE3Twc            //世界到相机的位姿变换
+                                    * Sim3Tco;      //相机到object的变换
         auto code = pyMapObject.attr("code").cast<Eigen::Vector<float, 64>>();
-        auto pNewObj = new MapObject(Sim3Two, code, mpCurrentKeyFrame, mpMap);
+        auto pNewObj = new MapObject(Sim3Two, code, pyOptimizer,  mpCurrentKeyFrame, mpMap);
 
         auto pyMesh = pyMeshExtractor.attr("extract_mesh_from_code")(code);
         pNewObj->vertices = pyMesh.attr("vertices").cast<Eigen::MatrixXf>();
         pNewObj->faces = pyMesh.attr("faces").cast<Eigen::MatrixXi>();
 
         pNewObj->AddObservation(mpCurrentKeyFrame, i);
-        mpCurrentKeyFrame->AddMapObject(pNewObj, i);
+        mpCurrentKeyFrame->AddMapObject(pNewObj, i);   //创建一个新物体
         mpMap->AddMapObject(pNewObj);
-        mpObjectDrawer->AddObject(pNewObj);
+        mpObjectDrawer->AddDrawerObject(pNewObj);
         mlpRecentAddedMapObjects.push_back(pNewObj);
     }
     // cout << "LocalMapping: Finished new objects creation" << endl;
@@ -207,7 +210,7 @@ void LocalMapping::CreateNewMapObjects()
 /*
  * Tracking utils for monocular input on Freiburg Cars and Redwood OS
  */
-void LocalMapping::CreateNewObjectsFromDetections()
+void LocalMapping::CreateNewObjectsFromDetections_onlyformono()
 {
     // cout << "LocalMapping: Started new objects creation" << endl;
 
@@ -227,15 +230,15 @@ void LocalMapping::CreateNewObjectsFromDetections()
             continue;
 
         // Create object with associated feature points
-        auto pNewObj = new MapObject(mpCurrentKeyFrame, mpMap);
+        auto pNewObj = new MapObject(pyOptimizer, mpCurrentKeyFrame, mpMap);
         mpCurrentKeyFrame->AddMapObject(pNewObj, det_i);
         mpMap->AddMapObject(pNewObj);
 
-        auto mvpMapPoints = mpCurrentKeyFrame->GetMapPointMatches();
+        auto mvpMapPoints_inthisKF = mpCurrentKeyFrame->GetMapPointMatches();   
         int n_valid_points = 0;
-        for (int k_i : det->GetFeaturePoints())
+        for (int k_i : det->GetFeaturePoints_onlyformono())
         {
-            auto pMP = mvpMapPoints[k_i];
+            auto pMP = mvpMapPoints_inthisKF[k_i];
             if (!pMP)
                 continue;
             if (pMP->isBad())
@@ -243,14 +246,14 @@ void LocalMapping::CreateNewObjectsFromDetections()
             pMP->in_any_object = true;
             pMP->object_id = pNewObj->mnId;
             pMP->keyframe_id_added_to_object = int(mpCurrentKeyFrame->mnId);
-            pNewObj->AddMapPoints(pMP);
+            pNewObj->AddMapPoints_foronlymono(pMP);
             n_valid_points++;
         }
         return;  // for mono sequences, we only focus on the single object in the middle
     }
 }
 
-void LocalMapping::ProcessDetectedObjects()
+void LocalMapping::ProcessDetectedObjects_onlyformono()
 {
     auto SE3Twc = Converter::toMatrix4f(mpCurrentKeyFrame->GetPoseInverse());
     auto SE3Tcw = Converter::toMatrix4f(mpCurrentKeyFrame->GetPose());
@@ -281,7 +284,7 @@ void LocalMapping::ProcessDetectedObjects()
         int numKFsPassedSinceInit = int(mpCurrentKeyFrame->mnId - pMO->mpRefKF->mnId);
 
         if (numKFsPassedSinceInit < 50)
-            pMO->ComputeCuboidPCA(numKFsPassedSinceInit < 15);
+            pMO->ComputeCuboidPCA_onlyformono(numKFsPassedSinceInit < 15);
         else  // when we have relative good object shape
             pMO->RemoveOutliersModel();
         // only begin to reconstruct the object if it is observed for enough amoubt of time (15 KFs)
@@ -295,7 +298,7 @@ void LocalMapping::ProcessDetectedObjects()
 //        if (numKFsPassedSinceLastRecon  < 8)
 //            continue;
 
-        std::vector<MapPoint*> points_on_object = pMO->GetMapPointsOnObject();
+        std::vector<MapPoint*> points_on_object = pMO->GetMapPointsOnObject_foronlymono();
         int n_points = points_on_object.size();
         int n_valid_points = 0;
         for (auto pMP : points_on_object)
@@ -311,7 +314,7 @@ void LocalMapping::ProcessDetectedObjects()
 
         int n_rays = 0;
         auto map_points_vector = mpCurrentKeyFrame->GetMapPointMatches();
-        for (auto idx : det->GetFeaturePoints())
+        for (auto idx : det->GetFeaturePoints_onlyformono())
         {
             auto pMP = map_points_vector[idx];
             if (!pMP)
@@ -355,7 +358,7 @@ void LocalMapping::ProcessDetectedObjects()
             Eigen::MatrixXf ray_pixels = Eigen::MatrixXf::Zero(n_rays, 2);
             Eigen::VectorXf depth_obs = Eigen::VectorXf::Zero(n_rays);
             int k_i = 0;
-            for (auto point_idx : det->GetFeaturePoints())
+            for (auto point_idx : det->GetFeaturePoints_onlyformono())
             {
                 auto pMP = map_points_vector[point_idx];
                 if (!pMP)
@@ -422,15 +425,19 @@ void LocalMapping::ProcessDetectedObjects()
                 code = pyMapObject.attr("code").cast<Eigen::Vector<float, 64>>();
             }
 
-            pMO->UpdateReconstruction(Sim3Two, code);
+            pMO->UpdateReconstruction_foronlymono(Sim3Two, code);
             auto pyMesh = pyMeshExtractor.attr("extract_mesh_from_code")(code);
             pMO->vertices = pyMesh.attr("vertices").cast<Eigen::MatrixXf>();
             pMO->faces = pyMesh.attr("faces").cast<Eigen::MatrixXi>();
             pMO->reconstructed = true;
             pMO->AddObservation(mpCurrentKeyFrame, det_i);
             mpCurrentKeyFrame->AddMapObject(pMO, det_i);
-            mpObjectDrawer->AddObject(pMO);
+            mpObjectDrawer->AddDrawerObject(pMO);
             mlpRecentAddedMapObjects.push_back(pMO);
+
+            // active dsp
+            pMO->compute_NBV();
+            pMO->compute_sdf_loss_of_all_inside_points();
 
             nLastReconKFID = int(mpCurrentKeyFrame->mnId);
         }

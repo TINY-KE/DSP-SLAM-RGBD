@@ -31,7 +31,7 @@ public:
 
     Object(const Eigen::MatrixXf &vertices, const Eigen::MatrixXi &faces);
 
-    pangolin::GlGeometry object_gl;
+    pangolin::GlGeometry object_gl;  //object的可视化信息
     Eigen::Vector3f mean;
     Eigen::Vector3f stddev;
     float norm_factor;

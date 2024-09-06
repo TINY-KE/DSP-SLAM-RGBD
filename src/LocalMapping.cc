@@ -89,20 +89,21 @@ void LocalMapping::Run()
             if (mpTracker->mSensor == System::STEREO)
             {
                 // Get new observations for map objects
-                GetNewObservations();
+                GetNewObservations_onyforStereo();
                 // Recent MapObjects Culling
                 MapObjectCulling();
                 // Create new MapObjects
-                CreateNewMapObjects();
+                CreateNewMapObjects_foronlyStereo();
             }
-            else if (mpTracker->mSensor == System::MONOCULAR)
+            // 【zhjd】单目情况下，只创建一个物体，其他点云向其中融合。
+            else if (mpTracker->mSensor == System::MONOCULAR)   
             {
                 if (mpTracker->mState != Tracking::NOT_INITIALIZED)
                 {
                     if (mpMap->GetAllMapObjects().empty())
-                        CreateNewObjectsFromDetections();
+                        CreateNewObjectsFromDetections_onlyformono();
                     // reconstruction
-                    ProcessDetectedObjects();
+                    ProcessDetectedObjects_onlyformono();
                 }
             }
             if (!stopRequested())
@@ -129,7 +130,7 @@ void LocalMapping::Run()
                 // Check redundant local Keyframes
                 KeyFrameCulling();
             }
-            // CreateNewMapObjects();
+            // CreateNewMapObjects_foronlyStereo();
 
             if (mpLoopCloser)
                 mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
@@ -180,7 +181,7 @@ void LocalMapping::ProcessNewKeyFrame()
 {
     {
         unique_lock<mutex> lock(mMutexNewKFs);
-        mpCurrentKeyFrame = mlNewKeyFrames.front();
+        mpCurrentKeyFrame = mlNewKeyFrames.front();   //更新当前的关键帧，为最新的关键帧。在localmapping的run()中不断执行。
         mlNewKeyFrames.pop_front();
     }
 

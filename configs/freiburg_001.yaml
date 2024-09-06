@@ -4,6 +4,16 @@
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 
+Tworld_camera.qw: -0.364187
+Tworld_camera.qx: 0.606109
+Tworld_camera.qy: 0.606109
+Tworld_camera.qz: -0.364187
+
+Tworld_camera.tx: 0.0
+Tworld_camera.ty: 0.0
+Tworld_camera.tz: 0.7  #this height is 0.2 higher than the height in gazebo
+
+
 # Camera calibration and distortion parameters (OpenCV)
 Camera.fx: 930.166 # 938.935 930.166
 Camera.fy: 930.166 # 938.935 930.166

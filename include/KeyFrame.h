@@ -253,6 +253,9 @@ protected:
     std::mutex mMutexConnections;
     std::mutex mMutexFeatures;
     std::mutex mMutexObjects;
+
+public: // active dsp
+    cv::Mat mGroundtruthPose_mat;           // camera groundtruth.
 };
 
 } //namespace ORB_SLAM

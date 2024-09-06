@@ -40,6 +40,7 @@
 #include "MapObject.h"
 
 #include <mutex>
+#include "MapPublisher.h"
 
 namespace ORB_SLAM2
 {
@@ -57,7 +58,7 @@ class Tracking
 
 public:
     Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Map* pMap,
-             KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+             KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, MapPublisher*  pMapPublisher);
 
     // Preprocess the input and call Track(). Extract features and performs stereo matching.
     cv::Mat GrabImageStereo(const cv::Mat &imRectLeft,const cv::Mat &imRectRight, const double &timestamp);
@@ -85,7 +86,7 @@ public:
     std::string detection_path;  // path to associated detected instances
     cv::Mat GetCameraIntrinsics();
     void GetObjectDetectionsMono(KeyFrame *pKF);
-    void AssociateObjectsByProjection(KeyFrame *pKF);  // assocating detection to object by projecting map points
+    void AssociateObjectsByProjection_onlyformono(KeyFrame *pKF);  // assocating detection to object by projecting map points
 
 
 public:
@@ -184,7 +185,7 @@ protected:
     KeyFrame* mpReferenceKF;
     std::vector<KeyFrame*> mvpLocalKeyFrames;
     std::vector<MapPoint*> mvpLocalMapPoints;
-    
+
     // System
     System* mpSystem;
     
@@ -192,6 +193,10 @@ protected:
     Viewer* mpViewer;
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
+    MapPublisher*  mpMapPublisher;
+
+    //配置文件
+    std::string mStrSettingPath;
 
     //Map
     Map* mpMap;

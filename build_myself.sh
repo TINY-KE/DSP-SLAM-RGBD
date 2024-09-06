@@ -56,16 +56,15 @@ highlight "LUE: Installing system-wise packages ..."
 #   libxkbcommon-dev \
 #   wayland-protocols
 
-# # install CUDA 11.3
-# if [[ $* == *--install-cuda* ]] ; then
-#   highlight "Installing CUDA..."
-#   wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda_11.3.0_465.19.01_linux.run
-#   wget https://developer.download.nvidia.com/compute/cuda/11.6.0/local_installers/cuda_11.6.0_510.39.01_linux.run
-#   sudo sh cuda_11.3.0_465.19.01_linux.run
-#   rm cuda_11.3.0_465.19.01_linux.run
-# fi # --install-cuda
-export PATH=/usr/local/cuda-11.6/bin:$PATH
-export LD_LIBRARY_PATH=/usr/local/cuda-11.6/lib64:$LD_LIBRARY_PATH
+# install CUDA 11.3
+if [[ $* == *--install-cuda* ]] ; then
+  highlight "Installing CUDA..."
+  wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda_11.3.0_465.19.01_linux.run
+  sudo sh cuda_11.3.0_465.19.01_linux.run
+  rm cuda_11.3.0_465.19.01_linux.run
+fi # --install-cuda
+export PATH=/usr/local/cuda-11.3/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-11.3/lib64:$LD_LIBRARY_PATH
 
 if [[ $* == *--build-dependencies* ]]; then
   highlight "Installing OpenCV ..."
@@ -167,43 +166,19 @@ fi # --build-dependencies
 
 
 
-if [[ $* == *--create-conda-env* ]] ; then
-  highlight "Creating Python environment ..."
-  conda env create -f environment_cuda116.yml
-fi # --create-conda-env
 
-
-highlight "2 Creating Python environment ..."
-conda_base=$(conda info --base)
-source "$conda_base/etc/profile.d/conda.sh"
-conda activate dsp-slam
-
-highlight "Installing mmdetection and mmdetection3d ..."
-pip install pycocotools==2.0.1
-pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu116/torch1.10.0/index.html
-# pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
-pip install mmdet==2.14.0
-pip install mmsegmentation==0.14.1
-cd Thirdparty
-git_clone "git clone https://github.com/JingwenWang95/mmdetection3d.git"
-cd mmdetection3d
-pip install -v -e .
-cd ../..
 
 highlight "building DSP-SLAM ..."
 if [ ! -d build ]; then
   mkdir build
 fi
 cd build
-conda_python_bin=`which python`
-conda_env_dir="$(dirname "$(dirname "$conda_python_bin")")"
-cmake \
-  -DOpenCV_DIR="$(pwd)/../Thirdparty/opencv/build" \
-  -DEigen3_DIR="$(pwd)/../Thirdparty/eigen/install/share/eigen3/cmake" \
-  # -DPangolin_DIR="$(pwd)/../Thirdparty/Pangolin/build" \
-  -DPYTHON_LIBRARIES="$conda_env_dir/lib/libpython3.7m.so" \
-  -DPYTHON_INCLUDE_DIRS="$conda_env_dir/include/python3.7m" \
-  -DPYTHON_EXECUTABLE="$conda_env_dir/bin/python3.7" \
-  ..
-make -j8
 
+cmake   -DOpenCV_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/opencv/build"  \
+    -DEigen3_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/eigen/install/share/eigen3/cmake" \
+    -DPangolin_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/Pangolin/build" \
+    -DPYTHON_LIBRARIES="/home/zhjd/anaconda3/envs/dsp-slam/lib/libpython3.7m.so" \
+    -DPYTHON_INCLUDE_DIRS="/home/zhjd/anaconda3/envs/dsp-slam/include/python3.7m" \
+    -DPYTHON_EXECUTABLE="/home/zhjd/anaconda3/envs/dsp-slam/bin/python3.7"   ..
+
+make -j12

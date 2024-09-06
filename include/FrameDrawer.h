@@ -33,7 +33,7 @@
 
 namespace ORB_SLAM2
 {
-
+class Map;
 class Tracking;
 class Viewer;
 

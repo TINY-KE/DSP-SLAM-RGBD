@@ -26,13 +26,28 @@
 
 #include"System.h"
 
+//ros
+#include<ros/ros.h>
+#include <cv_bridge/cv_bridge.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <std_msgs/Float64.h>
+#include <tf/tf.h>
+#include <tf/transform_datatypes.h>
+
 using namespace std;
+using namespace cv;
 
 void LoadImages(const string &strSequence, const float &fps, vector<string> &vstrImageFilenames,
                 vector<double> &vTimestamps);
 
 int main(int argc, char **argv)
 {
+    ros::init(argc, argv, "active_dsp");
+    ros::start();
+
     if(argc != 5)
     {
         cerr << endl << "Usage: ./mono_kitti path_to_vocabulary path_to_settings path_to_sequence path_to_saved_trajectory" << endl;
@@ -65,7 +80,7 @@ int main(int argc, char **argv)
     for(int ni = 0; ni < nImages; ni++)
     {
         // Read image from file
-        im = cv::imread(vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
+        im = cv::imread(vstrImageFilenames[ni],cv::IMREAD_UNCHANGED);
         double tframe = vTimestamps[ni];
 
         if(im.empty())
@@ -102,14 +117,15 @@ int main(int argc, char **argv)
     }
 
     SLAM.SaveEntireMap(string(argv[4]));
-  aitKey(0);
+    waitKey(0);
 
     // Stop all threads
     SLAM.Shutdown();
 
     // Tracking time statistics
     sort(vTimesTrack.begin(),vTimesTrack.end());
-    float totaltime = 0; 
+    float totaltime = 0;
+    for(int ni=0; ni<nImages; ni++)
     {
         totaltime+=vTimesTrack[ni];
     }

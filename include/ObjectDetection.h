@@ -33,8 +33,8 @@ public:
     ObjectDetection();  // Detection from Mono frame
     void SetPoseMeasurementSim3(const Eigen::Matrix4f &T);
     void SetPoseMeasurementSE3(const Eigen::Matrix4f &T);
-    std::vector<int> GetFeaturePoints();
-    void AddFeaturePoint(const int &i);
+    std::vector<int> GetFeaturePoints_onlyformono();
+    void AddFeaturePoint_onlyformono(const int &i);
     int NumberOfPoints();
 
 public:
@@ -49,7 +49,7 @@ public:
     Eigen::MatrixXf RayDirections;
     Eigen::VectorXf DepthObs;
     Eigen::MatrixXf background_rays;
-    std::vector<int> mvKeysIndices;
+    std::vector<int> mvKeysIndices_onlyformono; 
     int nRays;
     int nPts;
     bool isNew;

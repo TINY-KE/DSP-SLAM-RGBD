@@ -43,10 +43,11 @@ void ObjectDrawer::SetRenderer(ObjectRenderer *pRenderer)
     mpRenderer = pRenderer;
 }
 
-void ObjectDrawer::AddObject(MapObject *pMO)
+void ObjectDrawer::AddDrawerObject(MapObject *pMO)
 {
     unique_lock<mutex> lock(mMutexObjects);
     mlNewMapObjects.push_back(pMO);
+
 }
 
 void ObjectDrawer::ProcessNewObjects()
@@ -62,10 +63,11 @@ void ObjectDrawer::ProcessNewObjects()
     }
 }
 
-void ObjectDrawer::DrawObjects(bool bFollow, const Eigen::Matrix4f &Tec)
+void ObjectDrawer::DrawNBV(bool bFollow, const Eigen::Matrix4f &Tec)
 {
     unique_lock<mutex> lock(mMutexObjects);
 
+    // 地图中所有的物体
     auto mvpMapObjects = mpMap->GetAllMapObjects();
 
     for (MapObject *pMO : mvpMapObjects)
@@ -83,12 +85,86 @@ void ObjectDrawer::DrawObjects(bool bFollow, const Eigen::Matrix4f &Tec)
         }
         if (pMO->GetRenderId() >= 0)
         {
+
+            //NBV
+            pMO->compute_NBV();
+            const float &w = 3.0;
+            const float h = w*0.75;
+            const float z = w*0.6;
+            cv::Mat Twc = pMO->nbv->getCVMatPose().t();  //zhjd疑问：这里为什么用了转置？？
+//            auto T_w_to_nbv = Converter::toMatrix4d(Twc);
+//            std::cout << "zhjddebug NBV坐标" << " " << T_w_to_nbv(0, 3) << " " << T_w_to_nbv(1, 3) << " " << T_w_to_nbv(2, 3) << std::endl;
+//            auto T_w_to_nbv2 =  pMO->nbv->pose_isometry3d.matrix();
+//            std::cout<<"zhjddebug NBV坐标"<<" "<<T_w_to_nbv2(0, 3) << " " << T_w_to_nbv2(1, 3) << " " << T_w_to_nbv2(2, 3)<<std::endl;
+//            std::cout<<"zhjddebug NBV坐标"<<" "<<pMO->nbv->centor_x<<" "<<pMO->nbv->centor_y<<" "<<pMO->nbv->centor_z<<std::endl;
+
+            glPushMatrix();
+            glMultMatrixf(Twc.ptr<GLfloat>(0));
+            glLineWidth(2);
+            glColor3f(1.0f,0.0f,0.0f);
+            glBegin(GL_LINES);
+            glVertex3f(0,0,0);
+            glVertex3f(w,h,z);
+            glVertex3f(0,0,0);
+            glVertex3f(w,-h,z);
+            glVertex3f(0,0,0);
+            glVertex3f(-w,-h,z);
+            glVertex3f(0,0,0);
+            glVertex3f(-w,h,z);
+
+            glVertex3f(w,h,z);
+            glVertex3f(w,-h,z);
+
+            glVertex3f(-w,h,z);
+            glVertex3f(-w,-h,z);
+
+            glVertex3f(-w,h,z);
+            glVertex3f(w,h,z);
+
+            glVertex3f(-w,-h,z);
+            glVertex3f(w,-h,z);
+            glEnd();
+            glPopMatrix();
+
+        }
+
+    }
+}
+
+void ObjectDrawer::DrawObjects(bool bFollow, const Eigen::Matrix4f &Tec)
+{
+    unique_lock<mutex> lock(mMutexObjects);
+
+    // 地图中所有的物体
+    auto mvpMapObjects = mpMap->GetAllMapObjects();  
+
+    for (MapObject *pMO : mvpMapObjects)
+    {
+        if (!pMO)
+            continue;
+        if (pMO->isBad())
+            continue;
+
+        Eigen::Matrix4f Sim3Two = pMO->GetPoseSim3();  
+        int idx = pMO->GetRenderId();
+
+        if (bFollow) {
+            SE3TcwFollow = SE3Tcw;
+        }
+        if (pMO->GetRenderId() >= 0)
+        {
             // std::cout<<"RenderId 2： "<<idx<<std::endl;
-            mpRenderer->Render(pMO->GetRenderId(), Tec * SE3TcwFollow * Sim3Two, mvObjectColors[pMO->GetRenderId() % mvObjectColors.size()]);
+            mpRenderer->Render(pMO->GetRenderId(), 
+                        Tec * SE3TcwFollow /* CurrentCameraPose */ * Sim3Two  //这是
+                        , mvObjectColors[pMO->GetRenderId() % mvObjectColors.size()]);
+            auto objectpose = Tec * SE3TcwFollow /* CurrentCameraPose */ * Sim3Two;
+            std::cout<<"zhjddebug 物体坐标"<<" "<<objectpose(0,3)<<" "<<objectpose(1,3)<<" "<<objectpose(2,3)<<std::endl;
+
         }
         // DrawCuboid(pMO);
     }
 }
+
 
 void ObjectDrawer::DrawCuboid(MapObject *pMO)
 {

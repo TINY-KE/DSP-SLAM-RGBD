@@ -29,6 +29,7 @@
 #include <opencv2/core/eigen.hpp>
 #include <time.h>
 
+
 bool has_suffix(const std::string &str, const std::string &suffix) {
     std::size_t index = str.find(suffix, str.size() - suffix.size());
     return (index != std::string::npos);
@@ -109,11 +110,12 @@ System::System(const string &strVocFile, const string &strSettingsFile, const st
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
     mpObjectDrawer = new ObjectDrawer(mpMap, mpMapDrawer, strSettingsFile);
     mpMapDrawer->SetObjectDrawer(mpObjectDrawer);
+    mpMapPublisher = new MapPublisher(mpMap, strSettingsFile);
 
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                             mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
+                             mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor, mpMapPublisher);
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(this, mpMap, mpObjectDrawer, mSensor==MONOCULAR);
@@ -132,9 +134,13 @@ System::System(const string &strVocFile, const string &strSettingsFile, const st
     }
 
     //Initialize the Viewer thread and launch
-    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpObjectDrawer, mpTracker,strSettingsFile);
+    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpMapPublisher, mpObjectDrawer, mpTracker,strSettingsFile);
     mptViewer = new thread(&Viewer::Run, mpViewer);
     mpTracker->SetViewer(mpViewer);
+
+    // NBV
+    mpNbvGenerator = new NbvGenerator(mpMap, mpTracker, strSettingsFile);
+    mptNbvGenerator = new thread(&ORB_SLAM2::NbvGenerator::Run, mpNbvGenerator);
 
     //Set pointers between threads
     mpTracker->SetLocalMapper(mpLocalMapper);

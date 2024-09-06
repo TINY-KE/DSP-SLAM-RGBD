@@ -87,17 +87,27 @@ def get_batch_sdf_jacobian(decoder, lat_vec, x, out_dim=1):
     :param out_dim: int, output dimension of a single input
     :return: batched Jacobian (N, out_dim, code_len + 3)
     """
+    # 定义变量 n，它是查询位置张量 x 的批次大小（即张量的第一个维度大小）。
     n = x.shape[0]
+    # 克隆并分离查询位置张量 x，将结果赋值给 input_x。这样做是为了创建一个没有梯度的张量副本，以便后续操作不会影响原始张量的梯度。
     input_x = x.clone().detach()
+    # 使用潜在向量 lat_vec 扩展为形状为 (n, code_len) 的张量，并将结果赋值给 latent_repeat。这样做是为了将潜在向量复制为与查询位置张量 x 相同大小的张量，以便与其进行拼接
     latent_repeat = lat_vec.expand(n, -1)
+    # input是 lanten_vector和點坐標（xyz）拼接後的一維向量
+    # 在输入张量 inputs 的第二个维度前插入一个新的维度，将其形状变为 (n, 1, code_len + 3)。这样做是为了在后续操作中适应输出维度的要求。
     inputs = torch.cat([latent_repeat, input_x], 1)
 
+    # 【？？？】在输入张量 inputs 的第二个维度前插入一个新的维度，将其形状变为 (n, 1, code_len + 3)。这样做是为了在后续操作中适应输出维度的要求。
     inputs = inputs.unsqueeze(1)  # (n, 1, in_dim)
+    # 将输入张量 inputs 在第二个维度（列）上重复 out_dim 次，得到形状为 (n, out_dim, code_len + 3) 的张量。这样做是为了在计算批次中多个输入时，适应输出维度的要求
     inputs = inputs.repeat(1, out_dim, 1)  # (n, out_dim, in_dim)
+    # 将输入张量 inputs 设置为可求导状态，以便后续计算梯度。
     inputs.requires_grad = True
+    # 将输入张量 inputs 传递给解码器 decoder，得到输出张量 y。这个输出张量的形状为 (n, out_dim, out_dim)。
     y = decoder(inputs)  # (n, out_dim, out_dim)
-    # (n, out_dim, out_dim)
-    w = torch.eye(out_dim).view(1, out_dim, out_dim).repeat(n, 1, 1).cuda()
+    #  构造一个形状为 (1, out_dim, out_dim) 的单位矩阵，并在第一个维度上重复 n 次，得到形状为 (n, out_dim, out_dim) 的张量 w。这个张量将在后续的反向传播中用作权重矩阵。
+    w = torch.eye(out_dim).view(1, out_dim, out_dim).repeat(n, 1, 1).cuda()  # (n, out_dim, out_dim)
+    # 使用反向传播计算输出张量 y 相对于输入张量 inputs 的梯度，并使用权重矩阵 w
     y.backward(w, retain_graph=False)
 
     return y.detach(), inputs.grad.data.detach()

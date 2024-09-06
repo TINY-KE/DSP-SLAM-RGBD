@@ -53,7 +53,8 @@ void Tracking::GetObjectDetectionsLiDAR(KeyFrame *pKF) {
         pKF->mvpDetectedObjects.push_back(o);
     }
     pKF->nObj = pKF->mvpDetectedObjects.size();
-    pKF->mvpMapObjects = vector<MapObject *>(pKF->nObj, static_cast<MapObject *>(NULL));
+    pKF->mvpMapObjects = vector<MapObject *>(pKF->nObj, static_cast<MapObject *>(NULL));   
+    // 【zhjd】mvpMapObjects被清空，从而便于。
 }
 
 void Tracking::ObjectDataAssociation(KeyFrame *pKF)
@@ -190,7 +191,7 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
             int val = (int) mask_erro.at<float>(pKF->mvKeys[i].pt.y, pKF->mvKeys[i].pt.x);
             if (val > 0)  // inside the mask
             {
-                det->AddFeaturePoint(i);
+                det->AddFeaturePoint_onlyformono(i);
             }
         }
 
@@ -206,7 +207,7 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
 
 }
 
-void Tracking::AssociateObjectsByProjection(ORB_SLAM2::KeyFrame *pKF)
+void Tracking::AssociateObjectsByProjection_onlyformono(ORB_SLAM2::KeyFrame *pKF)
 {
     auto mvpMapPoints = pKF->GetMapPointMatches();
     // Try to match and triangulate key-points with last key-frame
@@ -217,7 +218,7 @@ void Tracking::AssociateObjectsByProjection(ORB_SLAM2::KeyFrame *pKF)
         auto detKF1 = detectionsKF1[d_i];
         map<int, int> observed_object_id;
         int nOutliers = 0;
-        for (int k_i : detKF1->GetFeaturePoints()) {
+        for (int k_i : detKF1->GetFeaturePoints_onlyformono()) {
             auto pMP = mvpMapPoints[k_i];
             if (!pMP)
                 continue;
@@ -256,7 +257,7 @@ void Tracking::AssociateObjectsByProjection(ORB_SLAM2::KeyFrame *pKF)
 
             // add newly detected feature points to object
             int newly_matched_points = 0;
-            for (int k_i : detKF1->GetFeaturePoints()) {
+            for (int k_i : detKF1->GetFeaturePoints_onlyformono()) {
                 auto pMP = mvpMapPoints[k_i];
                 if (pMP)
                 {
@@ -267,7 +268,7 @@ void Tracking::AssociateObjectsByProjection(ORB_SLAM2::KeyFrame *pKF)
                     {
                         pMP->in_any_object = true;
                         pMP->object_id = object_id_max_matches;
-                        pMO->AddMapPoints(pMP);
+                        pMO->AddMapPoints_foronlymono(pMP);
                         newly_matched_points++;
                     }
                     else
@@ -279,7 +280,7 @@ void Tracking::AssociateObjectsByProjection(ORB_SLAM2::KeyFrame *pKF)
                 }
             }
             /*cout <<  "Matches: " << max_matches << ", New points: " << newly_matched_points << ", Keypoints: " <<
-                 detKF1->mvKeysIndices.size() << ", Associated to object by projection " << object_id_max_matches
+                 detKF1->mvKeysIndices_onlyformono.size() << ", Associated to object by projection " << object_id_max_matches
                  << endl << endl;*/
         }
 

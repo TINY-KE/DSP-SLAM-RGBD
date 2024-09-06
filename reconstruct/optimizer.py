@@ -19,7 +19,7 @@ import math
 import numpy as np
 import torch
 from reconstruct.utils import ForceKeyErrorDict, create_voxel_grid, convert_sdf_voxels_to_mesh
-from reconstruct.loss import compute_sdf_loss, compute_render_loss, compute_rotation_loss_sim3
+from reconstruct.loss import compute_sdf_loss, compute_sdf_loss_objectpoint, compute_render_loss, compute_rotation_loss_sim3
 from reconstruct.loss_utils import decode_sdf, get_robust_res, exp_se3, exp_sim3, get_time
 
 
@@ -42,6 +42,7 @@ class Optimizer(object):
         if configs.data_type == "KITTI":
             self.num_iterations_pose_only = optim_cfg.pose_only_optim.num_iterations
 
+    # 【只用于双目】
     def estimate_pose_cam_obj(self, t_co_se3, scale, pts, code):
         """
         :param t_co_se3: o2c transformation (4, 4) in SE(3)
@@ -85,6 +86,7 @@ class Optimizer(object):
 
         return t_cam_obj
 
+    # 【只用于单目】
     def reconstruct_object(self, t_cam_obj, pts, rays, depth, code=None):
         """
         :param t_cam_obj: object pose, object-to-camera transformation
@@ -201,6 +203,14 @@ class Optimizer(object):
         return ForceKeyErrorDict(t_cam_obj=t_cam_obj.numpy(),
                                  code=latent_vector.cpu().numpy(),
                                  is_good=True, loss=loss)
+
+    def compute_sdf_loss_objectpoint_zhjd(self, pts_surface_obj, code):
+        latent_vector = torch.from_numpy(code[:self.code_len]).cuda()
+        pts_surface_obj_cuda = torch.from_numpy(pts_surface_obj).cuda()
+        res_sdf = compute_sdf_loss_objectpoint(self.decoder, pts_surface_obj_cuda, latent_vector)
+        mean_value = res_sdf.squeeze().mean()
+        print("[mapobject sdf loss]python:", mean_value)
+        return mean_value
 
 
 class MeshExtractor(object):

@@ -24,7 +24,7 @@ namespace ORB_SLAM2
 
 int MapObject::nNextId = 0;
 
-MapObject::MapObject(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode, KeyFrame *pRefKF, Map *pMap) :
+MapObject::MapObject(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode, const py::object& pyOp, KeyFrame *pRefKF, Map *pMap) :
         mpRefKF(pRefKF), mpNewestKF(pRefKF), mnBALocalForKF(0), mnAssoRefID(0), mnFirstKFid(pRefKF->mnId),
         mnCorrectedByKF(0), mnCorrectedReference(0), mnLoopObjectForKF(0), mnBAGlobalForKF(0),
         w(1.), h(1.), l(1.), mbBad(false), mbDynamic(false), mpMap(pMap), nObs(0), mRenderId(-1)
@@ -50,9 +50,11 @@ MapObject::MapObject(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &v
     vShapeCode = vCode;
     velocity = Eigen::Vector3f::Zero();
     mnId = nNextId++;
+
+    pyOptimizer = pyOp;  //[zhjd]
 }
 
-MapObject::MapObject(KeyFrame *pRefKF, Map *pMap) :
+MapObject::MapObject(const py::object& pyOp, KeyFrame *pRefKF, Map *pMap) :
         mpRefKF(pRefKF), mpNewestKF(pRefKF), mnBALocalForKF(0), mnAssoRefID(0), mnFirstKFid(pRefKF->mnId),
         mnCorrectedByKF(0), mnCorrectedReference(0), mnLoopObjectForKF(0), mnBAGlobalForKF(0),
         reconstructed(false), w(1.), h(1.), l(1.), mbBad(false), mbDynamic(false), mpMap(pMap), nObs(0), mRenderId(-1)
@@ -61,6 +63,9 @@ MapObject::MapObject(KeyFrame *pRefKF, Map *pMap) :
     scale = 1.;
     invScale = 1.;
     vShapeCode = Eigen::Vector<float, 64>::Zero();
+
+    pyOptimizer = pyOp;   //[zhjd]
+
 }
 
 void MapObject::AddObservation(KeyFrame *pKF, int idx)
@@ -229,16 +234,16 @@ void MapObject::SetShapeCode(const Eigen::Vector<float, 64> &code)
     vShapeCode = code;
 }
 
-void MapObject::UpdateReconstruction(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode)
+void MapObject::UpdateReconstruction_foronlymono(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode)
 {
     SetObjectPoseSim3(T);
     SetShapeCode(vCode);
 }
 
-std::vector<MapPoint*> MapObject::GetMapPointsOnObject()
+std::vector<MapPoint*> MapObject::GetMapPointsOnObject_foronlymono()
 {
     unique_lock<mutex> lock(mMutexFeatures);
-    return vector<MapPoint *>(map_points.begin(), map_points.end());
+    return vector<MapPoint *>(map_points_foronlymono.begin(), map_points_foronlymono.end());
 }
 
 void MapObject::RemoveOutliersSimple()
@@ -246,7 +251,7 @@ void MapObject::RemoveOutliersSimple()
     // First pass, remove all the outliers marked by ORB-SLAM
     int n_pts = 0;
     Eigen::Vector3f x3D_mean = Eigen::Vector3f::Zero();
-    for (auto pMP : GetMapPointsOnObject())
+    for (auto pMP : GetMapPointsOnObject_foronlymono())
     {
         if (!pMP)
             continue;
@@ -267,7 +272,7 @@ void MapObject::RemoveOutliersSimple()
 
     // Second pass, remove obvious outliers
     x3D_mean /= n_pts;
-    for (auto pMP : GetMapPointsOnObject())
+    for (auto pMP : GetMapPointsOnObject_foronlymono())
     {
         Eigen::Vector3f x3Dw = Converter::toVector3f(pMP->GetWorldPos());
         if ((x3Dw - x3D_mean).norm() > 1.0)
@@ -293,11 +298,12 @@ void MapObject::RemoveOutliersModel()
     w = (xmax - xmin) * scale;
     h = (ymax - ymin) * scale;
     l = (zmax - zmin) * scale;
+    updateCuboid3D();
     float sx = 1.2;
     float sy = 1.5;
     float sz = 1.2;
 
-    auto mvpMapPoints = GetMapPointsOnObject();
+    auto mvpMapPoints = GetMapPointsOnObject_foronlymono();
     for (auto pMP : mvpMapPoints)
     {
         if (!pMP)
@@ -321,10 +327,10 @@ void MapObject::RemoveOutliersModel()
     }
 }
 
-void MapObject::ComputeCuboidPCA(bool updatePose)
+void MapObject::ComputeCuboidPCA_onlyformono(bool updatePose)
 {
     RemoveOutliersSimple();
-    auto mvpMapPoints = GetMapPointsOnObject();
+    auto mvpMapPoints = GetMapPointsOnObject_foronlymono();
     int N = mvpMapPoints.size();
 
     if (N == 0)
@@ -394,8 +400,10 @@ void MapObject::ComputeCuboidPCA(bool updatePose)
     w = (x(hi) - x(lo));
     h = (y(hi) - y(lo));
     l = (z(hi) - z(lo));
+    updateCuboid3D();
     Eigen::Vector3f cuboid_centre_o((x(hi) + x(lo)) / 2., (y(hi) + y(lo)) / 2., (z(hi) + z(lo)) / 2.);
     Eigen::Vector3f cuboid_centre_w = R * cuboid_centre_o;
+
 
     // Remove outliers using computed PCA box
     int num_outliers = 0;
@@ -434,16 +442,16 @@ void MapObject::ComputeCuboidPCA(bool updatePose)
     }
 }
 
-void MapObject::AddMapPoints(MapPoint *pMP)
+void MapObject::AddMapPoints_foronlymono(MapPoint *pMP)
 {
     unique_lock<mutex> lock(mMutexFeatures);
-    map_points.insert(pMP);
+    map_points_foronlymono.insert(pMP);
 }
 
 void MapObject::EraseMapPoint(MapPoint *pMP)
 {
     unique_lock<mutex> lock(mMutexFeatures);
-    map_points.erase(pMP);
+    map_points_foronlymono.erase(pMP);
     pMP->SetBadFlag();
 }
 
@@ -496,5 +504,31 @@ bool MapObject::isDynamic()
     return mbDynamic;
 }
 
+void MapObject::updateCuboid3D() {
+    double s = 0.5;
+    float x_min_obj = -1*s*w;
+    float x_max_obj = s*w;
+    float y_min_obj = -1*s*h;
+    float y_max_obj = s*h;
+    float z_min_obj = -1*s*l;
+    float z_max_obj = s*l;
+//    pangolin::OpenGlMatrix Two = Converter::toMatrixPango(pMO->SE3Two);
+
+    mCuboid3D.corner_1 = Rwo * Eigen::Vector3f(x_min_obj, y_min_obj, z_min_obj) + two;
+    mCuboid3D.corner_2 = Rwo * Eigen::Vector3f(x_max_obj, y_min_obj, z_min_obj) + two;
+    mCuboid3D.corner_3 = Rwo * Eigen::Vector3f(x_max_obj, y_max_obj, z_min_obj) + two;
+    mCuboid3D.corner_4 = Rwo * Eigen::Vector3f(x_min_obj, y_max_obj, z_min_obj) + two;
+    mCuboid3D.corner_5 = Rwo * Eigen::Vector3f(x_min_obj, y_min_obj, z_max_obj) + two;
+    mCuboid3D.corner_6 = Rwo * Eigen::Vector3f(x_max_obj, y_min_obj, z_max_obj) + two;
+    mCuboid3D.corner_7 = Rwo * Eigen::Vector3f(x_max_obj, y_max_obj, z_max_obj) + two;
+    mCuboid3D.corner_8 = Rwo * Eigen::Vector3f(x_min_obj, y_max_obj, z_max_obj) + two;
+
+    mCuboid3D.width = w;
+    mCuboid3D.lenth = l;
+    mCuboid3D.height = h;
 }
+
+}
+
+
 

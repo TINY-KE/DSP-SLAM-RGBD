@@ -45,13 +45,13 @@ namespace ORB_SLAM2
 {
 
 Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap,
-        KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
+        KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, MapPublisher*  pMapPublisher):
     mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false), mbVO(false), mpORBVocabulary(pVoc),
     mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys), mpViewer(NULL),
-    mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpMap(pMap), mnLastRelocFrameId(0)
+    mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpMap(pMap), mnLastRelocFrameId(0),  mpMapPublisher(pMapPublisher)
 {
     // Load camera parameters from settings file
-
+    mStrSettingPath = strSettingPath;
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
     float fx = fSettings["Camera.fx"];
     float fy = fSettings["Camera.fy"];
@@ -267,6 +267,37 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
     else
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 
+    cv::FileStorage fSettings(mStrSettingPath, cv::FileStorage::READ);
+    std::cout<<"开始读取Tworld_camera"<<std::endl;
+    float qx = fSettings["Tworld_camera.qx"], qy = fSettings["Tworld_camera.qy"], qz = fSettings["Tworld_camera.qz"], qw = fSettings["Tworld_camera.qw"],
+            tx = fSettings["Tworld_camera.tx"], ty = fSettings["Tworld_camera.ty"], tz = fSettings["Tworld_camera.tz"];
+    //float qx = fSettings["Tgroud_firstcamera.qx"], qy = fSettings["Tgroud_firstcamera.qy"], qz = fSettings["Tgroud_firstcamera.qz"], qw = fSettings["Tgroud_firstcamera.qw"],
+    //       tx = fSettings["Tgroud_firstcamera.tx"], ty = fSettings["Tgroud_firstcamera.ty"], tz = fSettings["Tgroud_firstcamera.tz"];
+    std::cout<<"结束读取Tworld_camera"<<std::endl;
+    std::cout<<qx<<std::endl;
+    std::cout<<qy<<std::endl;
+    std::cout<<qz<<std::endl;
+    std::cout<<qw<<std::endl;
+    std::cout<<tx<<std::endl;
+    std::cout<<ty<<std::endl;
+    std::cout<<tz<<std::endl;
+    mCurrentFrame.mGroundtruthPose_mat = cv::Mat::eye(4, 4, CV_32F);
+    Eigen::Quaterniond quaternion(Eigen::Vector4d(qx, qy, qz, qw));
+    Eigen::AngleAxisd rotation_vector(quaternion);
+    Eigen::Isometry3d T = Eigen::Isometry3d::Identity();
+    T.rotate(rotation_vector);
+    T.pretranslate(Eigen::Vector3d(tx, ty, tz));
+    Eigen::Matrix4d GroundtruthPose_eigen = T.matrix();
+    cv::Mat cv_mat_64f;
+    cv::eigen2cv(GroundtruthPose_eigen, cv_mat_64f);
+    std::cout<<"[grab] GroundtruthPose_eigen : "<<GroundtruthPose_eigen<<std::endl;
+    std::cout<<"[grab] mInitialFrame.mGroundtruthPose_mat 0: "<<cv_mat_64f<<std::endl;
+//    cv_mat_32f.convertTo(mCurrentFrame.mGroundtruthPose_mat, CV_32F);
+    cv::Mat cv_mat_32f;
+    cv_mat_64f.convertTo(cv_mat_32f, CV_32F);
+    mInitialFrame.mGroundtruthPose_mat = cv_mat_32f.clone();
+    std::cout<<"[grab] mInitialFrame.mGroundtruthPose_mat : "<<mInitialFrame.mGroundtruthPose_mat<<std::endl;
+
     Track();
 
     return mCurrentFrame.mTcw.clone();
@@ -440,6 +471,7 @@ void Tracking::Track()
                 mVelocity = cv::Mat();
 
             mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+            mpMapPublisher->SetCurrentCameraPose(mCurrentFrame.mTcw);
 
             // Clean VO matches
             for(int i=0; i<mCurrentFrame.N; i++)
@@ -566,6 +598,7 @@ void Tracking::StereoInitialization()
         mpMap->mvpKeyFrameOrigins.push_back(pKFini);
 
         mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+        mpMapPublisher->SetCurrentCameraPose(mCurrentFrame.mTcw);
 
         mState=OK;
     }
@@ -722,6 +755,44 @@ void Tracking::CreateInitialMapMonocular()
             pMP->SetWorldPos(pMP->GetWorldPos()*invMedianDepth);
         }
     }
+
+    // NOTE [active dsp] rotate the world coordinate to the initial frame (groundtruth provides the normal vector of the ground).
+    // only use the groundtruth of the first frame.
+    cv::Mat InitToGround = mInitialFrame.mGroundtruthPose_mat;
+    cv::Mat R = InitToGround.rowRange(0, 3).colRange(0, 3);
+    cv::Mat t = InitToGround.rowRange(0, 3).col(3);
+    cv::Mat Rinv = R.t();
+    cv::Mat Ow = -Rinv * t;
+    cv::Mat GroundToInit = cv::Mat::eye(4, 4, CV_32F);
+    Rinv.copyTo(GroundToInit.rowRange(0, 3).colRange(0, 3));
+    Ow.copyTo(GroundToInit.rowRange(0, 3).col(3));
+
+    bool build_worldframe_on_ground = true;
+    if (build_worldframe_on_ground) // transform initial pose and map to ground frame
+    {
+        pKFini->SetPose(pKFini->GetPose() * GroundToInit);
+        pKFcur->SetPose(pKFcur->GetPose() * GroundToInit);
+
+        for (size_t iMP = 0; iMP < vpAllMapPoints.size(); iMP++)
+        {
+            if (vpAllMapPoints[iMP])
+            {
+                MapPoint *pMP = vpAllMapPoints[iMP];
+
+
+                std::cout<<"InitToGround1: "<<InitToGround.rowRange(0, 3).colRange(0, 3).type()<<std::endl;
+
+                std::cout<<"InitToGround2: "<<pMP->GetWorldPos().type()<<std::endl;
+                std::cout<<"InitToGround3: "<<InitToGround.rowRange(0, 3).col(3).type()<<std::endl;
+                cv::Mat debugcvmat = InitToGround.rowRange(0, 3).colRange(0, 3) * pMP->GetWorldPos() + InitToGround.rowRange(0, 3).col(3);
+                std::cout<<"InitToGround4: "<< debugcvmat <<std::endl;
+
+                pMP->SetWorldPos(InitToGround.rowRange(0, 3).colRange(0, 3) * pMP->GetWorldPos() + InitToGround.rowRange(0, 3).col(3));
+            }
+        }
+    }
+    // [active dsp] rotate the world coordinate to the initial frame -----------------------------------------------------------
+
 
     mpLocalMapper->InsertKeyFrame(pKFini);
     mpLocalMapper->InsertKeyFrame(pKFcur);
@@ -1093,7 +1164,7 @@ void Tracking::CreateNewKeyFrame()
         if (!mpMap->GetAllMapObjects().empty())
         {
             // AssociateObjects(pKF);
-            AssociateObjectsByProjection(pKF);
+            AssociateObjectsByProjection_onlyformono(pKF);
         }
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 

@@ -131,21 +131,40 @@ class Renderer
 {
 public:
 
-    pangolin::GlSlProgram program;
-    pangolin::GlFramebuffer framebuffer;
-    pangolin::GlRenderBuffer zbuffer;
-    pangolin::GlTexture texture_object_depth;
-    pangolin::GlTexture texture_object_rgb;
-    pangolin::GlTexture texture_object_normals;
-    pangolin::GlTexture texture_object_mask;
     int viewport_backup[4];
+    // 用于设置视口的位置和大小。
+    // 其中，viewport_backup数组存储了之前保存的视口参数
+
+
+    // 这段代码声明了几个变量，它们都是属于Pangolin库中的OpenGL封装类，用于在OpenGL中进行渲染和图形处理。
+    // OpenGL着色器程序对象，用于管理顶点着色器、几何着色器和片段着色器的链接和使用。
+    pangolin::GlSlProgram program;
+
+    // 这是一个OpenGL帧缓冲对象，用于管理渲染到纹理或渲染缓冲区的操作。
+    pangolin::GlFramebuffer framebuffer;
+
+    // OpenGL渲染缓冲对象，通常用于存储深度信息，即深度缓冲。
+    pangolin::GlRenderBuffer zbuffer;
+
+    // OpenGL纹理对象，用于存储RGB颜色信息的纹理数据。
+    pangolin::GlTexture texture_object_rgb;
+
+    // 【无用】OpenGL纹理对象，用于存储深度信息的纹理数据。 
+    pangolin::GlTexture texture_object_depth;
+
+    // 【无用】OpenGL纹理对象，用于存储法线信息的纹理数据。
+    pangolin::GlTexture texture_object_normals;
+
+    // 【无用】OpenGL纹理对象，用于存储遮罩信息的纹理数据。 
+    pangolin::GlTexture texture_object_mask;
 
 public:
-
+    // 默认构造函数，调用另一个构造函数Renderer(0, 0)。
     Renderer(){
         Renderer(0, 0);
     }
-
+    
+    // Renderer(size_t w, size_t h)：带参数的构造函数，初始化渲染器，包括设置着色器和根据传入的宽度和高度创建帧缓冲。
     Renderer(size_t w, size_t h)
     {
         if(pangolin::ShouldQuit())
@@ -160,6 +179,7 @@ public:
         }
     }
 
+    // Bind()：绑定渲染器，包括绑定帧缓冲、设置视口、启用深度测试和绑定着色器程序。 
     void Bind()
     {
         if(framebuffer.fbid)
@@ -173,6 +193,7 @@ public:
         program.Bind();
     }
 
+    // Clear()：清除渲染器的颜色缓冲和深度缓冲。
     void Clear()
     {
         if(!framebuffer.fbid)
@@ -184,6 +205,7 @@ public:
         framebuffer.Unbind();
     }
 
+    // SetUniformColor(float r, float g, float b)：设置uniform变量object_color的值。
     void SetUniformColor(float r, float g, float b)
     {
         program.SetUniform("object_color", r, g, b);

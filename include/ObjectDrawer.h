@@ -37,9 +37,10 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     ObjectDrawer(Map *pMap, MapDrawer *pMapDrawer, const string &strSettingPath);
     void SetRenderer(ObjectRenderer *pRenderer);
-    void AddObject(MapObject *pMO);
+    void AddDrawerObject(MapObject *pMO);
     void ProcessNewObjects();
     void DrawObjects(bool bFollow, const Eigen::Matrix4f &Tec);
+    void DrawNBV(bool bFollow, const Eigen::Matrix4f &Tec);
     void DrawCuboid(MapObject *pMO);
     void SetCurrentCameraPose(const Eigen::Matrix4f &Tcw);
     std::list<MapObject*> mlNewMapObjects;

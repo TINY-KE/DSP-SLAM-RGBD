@@ -37,9 +37,10 @@
 #include "KeyFrameDatabase.h"
 #include "ORBVocabulary.h"
 #include "Viewer.h"
-
+#include "NbvGenerator.h"   //zhjd
 #include <pybind11/embed.h>
 #include <pybind11/eigen.h>
+#include "MapPublisher.h"
 
 namespace py = pybind11;
 
@@ -52,7 +53,7 @@ class Map;
 class Tracking;
 class LocalMapping;
 class LoopClosing;
-
+class NbvGenerator;
 class PyThreadStateLock
 {
 public:
@@ -185,16 +186,18 @@ private:
 
     // The viewer draws the map and the current camera pose. It uses Pangolin.
     Viewer* mpViewer;
-
+    NbvGenerator* mpNbvGenerator;
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
     ObjectDrawer* mpObjectDrawer;
+    MapPublisher* mpMapPublisher;
 
     // System threads: Local Mapping, Loop Closing, Viewer.
     // The Tracking thread "lives" in the main execution thread that creates the System object.
     std::thread* mptLocalMapping;
     std::thread* mptLoopClosing;
     std::thread* mptViewer;
+    std::thread* mptNbvGenerator;
 
     // Reset flag
     std::mutex mMutexReset;

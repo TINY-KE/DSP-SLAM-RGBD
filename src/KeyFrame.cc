@@ -54,6 +54,8 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
     }
 
     SetPose(F.mTcw);
+
+    mGroundtruthPose_mat = F.mGroundtruthPose_mat.clone();
 }
 
 void KeyFrame::ComputeBoW()

@@ -205,3 +205,12 @@ cmake \
   ..
 make -j8
 
+#cmake   -DOpenCV_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/opencv/build"  -DOpenCV_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/opencv/build"  -DEigen3_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/eigen/install/share/eigen3/cmake"  -DPangolin_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/Pangolin/build"   -DPYTHON_LIBRARIES="/home/zhjd/anaconda3/envs/dsp-slam/lib/libpython3.7m.so"   -DPYTHON_INCLUDE_DIRS="/home/zhjd/anaconda3/envs/dsp-slam/include/python3.7m" -DPYTHON_EXECUTABLE="/home/zhjd/anaconda3/envs/dsp-slam/bin/python3.7"   ..
+
+#cmake   -DOpenCV_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/opencv/build"
+#
+#  -DEigen3_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/eigen/install/share/eigen3/cmake"
+#  -DPangolin_DIR="/home/zhjd/work/DSP-SLAM//Thirdparty/Pangolin/build"
+#  -DPYTHON_LIBRARIES="/home/zhjd/anaconda3/envs/dsp-slam/lib/libpython3.7m.so"
+#  -DPYTHON_INCLUDE_DIRS="/home/zhjd/anaconda3/envs/dsp-slam/include/python3.7m"
+#  -DPYTHON_EXECUTABLE="/home/zhjd/anaconda3/envs/dsp-slam/bin/python3.7"   ..

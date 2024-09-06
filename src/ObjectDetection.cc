@@ -61,22 +61,22 @@ ObjectDetection::ObjectDetection() : isNew(true), isGood(true)
     nRays = 0;
 }
 
-std::vector<int> ObjectDetection::GetFeaturePoints()
+std::vector<int> ObjectDetection::GetFeaturePoints_onlyformono()
 {
     std::unique_lock<std::mutex> lock(mMutexFeatures);
-    return mvKeysIndices;
+    return mvKeysIndices_onlyformono;
 }
 
-void ObjectDetection::AddFeaturePoint(const int &i)
+void ObjectDetection::AddFeaturePoint_onlyformono(const int &i)
 {
     std::unique_lock<std::mutex> lock(mMutexFeatures);
-    mvKeysIndices.push_back(i);
+    mvKeysIndices_onlyformono.push_back(i);
 }
 
 int ObjectDetection::NumberOfPoints()
 {
     std::unique_lock<std::mutex> lock(mMutexFeatures);
-    return mvKeysIndices.size();
+    return mvKeysIndices_onlyformono.size();
 }
 
 void ObjectDetection::SetPoseMeasurementSim3(const Eigen::Matrix4f &T) {

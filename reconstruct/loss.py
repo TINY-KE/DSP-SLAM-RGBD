@@ -43,6 +43,20 @@ def compute_sdf_loss(decoder, pts_surface_cam, t_obj_cam, latent_vector):
     return jac_toc, jac_code, res_sdf
 
 
+def compute_sdf_loss_objectpoint(decoder, pts_surface_obj, latent_vector):
+    res_sdf, de_di = get_batch_sdf_jacobian(decoder, latent_vector, pts_surface_obj, 1)
+    # # SDF term Jacobian
+    # de_dxo = de_di[..., -3:]
+    # # Jacobian for pose
+    # dxo_dtoc = get_points_to_pose_jacobian_sim3(pts_surface_obj)
+    # jac_toc = torch.bmm(de_dxo, dxo_dtoc)
+    # # Jacobian for code
+    # jac_code = de_di[..., :-3]
+
+    return res_sdf  #jac_toc, jac_code,
+
+
+
 def compute_render_loss(decoder, ray_directions, depth_obs, t_obj_cam, sampled_ray_depth, latent_vector, th=0.01):
     """
     :param decoder: DeepSDF decoder

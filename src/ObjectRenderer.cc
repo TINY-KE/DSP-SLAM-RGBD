@@ -19,6 +19,7 @@
 
 namespace ORB_SLAM2 {
 
+// 从path_mesh中读取网格文件
 Object::Object(const std::string &path_mesh) :
         mean(0, 0, 0),
         stddev(1, 1, 1),
@@ -27,7 +28,10 @@ Object::Object(const std::string &path_mesh) :
     object_gl = pangolin::ToGlGeometry(geometry);
 }
 
-Object::Object(const Eigen::MatrixXf &vertices, const Eigen::MatrixXi &faces) :
+// 怎么生成物体的可视化信息
+Object::Object(const Eigen::MatrixXf &vertices, //顶点信息
+                const Eigen::MatrixXi &faces  //面的信息
+                ) :
         mean(0, 0, 0),
         stddev(1, 1, 1),
         norm_factor(1) {
@@ -84,6 +88,7 @@ void ObjectRenderer::SetupCamera(double fx, double fy, double cx, double cy, dou
     this->far = far;
 }
 
+// 【没用到】
 uint64_t ObjectRenderer::AddObject(const std::string &mesh_path) {
     uint64_t identifier = GetNextIdentifier();
     // objects[identifier] = std::make_shared<Object>(mesh_path);
@@ -91,6 +96,7 @@ uint64_t ObjectRenderer::AddObject(const std::string &mesh_path) {
     return identifier;
 }
 
+// 在object drawer中用到了
 uint64_t ObjectRenderer::AddObject(const Eigen::MatrixXf &vertices, const Eigen::MatrixXi &faces) {
     uint64_t identifier = GetNextIdentifier();
     // objects[identifier] = std::make_shared<Object>(vertices, faces);
@@ -98,8 +104,7 @@ uint64_t ObjectRenderer::AddObject(const Eigen::MatrixXf &vertices, const Eigen:
     return identifier;
 }
 
-void
-ObjectRenderer::Render(uint64_t identifier, const Eigen::Matrix4f &T_co, std::tuple<float, float, float> color) {
+void ObjectRenderer::Render(uint64_t identifier, const Eigen::Matrix4f &T_co, std::tuple<float, float, float> color) {
     auto o = objects.find(identifier);
     if (o == objects.end()) {
         throw std::invalid_argument("Unknown object, identifier: " + std::to_string(identifier));
