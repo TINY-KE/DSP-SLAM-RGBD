@@ -26,3 +26,6 @@
 
 # G2O的编译指令
 cmake -DEigen3_DIR="/home/robotlab/thirdparty/for_dspslam/eigen/install/share/eigen3/cmake" ..
+
+# commit 记账
+  ## 
