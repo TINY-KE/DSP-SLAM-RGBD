@@ -1,0 +1,60 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "C++ Launch",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/dsp_slam_mono",
+        // "program": "${workspaceFolder}/label_tool",
+        // "program": "${workspaceFolder}/instanceAnnotation",
+        "args": [
+                 
+            "Vocabulary/ORBvoc.bin",
+            "configs/freiburg_001.yaml",
+            "/media/robotlab/新加卷/ubuntu22/DSP-SLAM/data/freiburg_cars/Car001",
+            "map/freiburg/001"
+
+            // "Vocabulary/ORBvoc.bin",
+            // "configs/tum_fr1_desk.yaml",
+            // "/media/lj/TOSHIBA/dataset/TUM/fr1_desk/rgbd_dataset_freiburg1_desk",
+            // "configs/associations/fr1_desk.txt",
+            // "map/tum/fr1_desk"
+
+            // "Vocabulary/ORBvoc.bin",
+            // "configs/redwood_chair_01053.yaml",
+            // "/media/lj/TOSHIBA/dataset/RedwoodOS/data/rgbd/01053",
+            // "/media/lj/TOSHIBA/dataset/RedwoodOS/data/rgbd/01053/associate.txt",
+            // "map/redwood/01053"
+
+            // "Vocabulary/ORBvoc.bin",
+            // "configs/redwood_monitor_01041.yaml",
+            // "/media/lj/TOSHIBA/dataset/RedwoodOS/data/rgbd/01041",
+            // "/media/lj/TOSHIBA/dataset/RedwoodOS/data/rgbd/01041/associate.txt",
+            // "map/redwood/01041"
+
+            // "Vocabulary/ORBvoc.bin",
+            // // "configs/tum_fr2_dishes.yaml",
+            // "configs/redwood_chair_01053.yaml",
+            // "/home/lj/Documents/dataset/TUM/rgbd_dataset_freiburg2_dishes",
+            // "/home/lj/Documents/dataset/TUM/rgbd_dataset_freiburg2_dishes/associate.txt",
+            // "map/tum/fr2_dishes"
+
+
+            // "Vocabulary/ORBvoc.bin",
+            // "configs/self_allobject_circle.yaml",
+            // "/media/lj/TOSHIBA/dataset/FromZHJD/circle",
+            // "/media/lj/TOSHIBA/dataset/FromZHJD/circle/associate.txt",
+            // "map/self/circle"
+
+            
+
+        ],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "miDebuggerPath": "/usr/bin/gdb"
+      }
+    ]
+}
