@@ -32,7 +32,7 @@ void Tracking::GetObjectDetectionsLiDAR(KeyFrame *pKF) {
 
     PyThreadStateLock PyThreadLock;
 
-    py::list detections = mpSystem->pySequence.attr("get_frame_by_id")(pKF->mnFrameId);
+    py::list detections = mpSystem->pySequence.attr("get_frame_by_id")(pKF->mnFrameId);   
     for (auto det : detections) {
         auto pts = det.attr("surface_points").cast<Eigen::MatrixXf>();
         auto Sim3Tco = det.attr("T_cam_obj").cast<Eigen::Matrix4f>();
@@ -163,8 +163,8 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
 {
     PyThreadStateLock PyThreadLock;
 
-    py::list detections = mpSystem->pySequence.attr("get_frame_by_id")(pKF->mnFrameId);
-    int num_dets = detections.size();
+    py::list detections = mpSystem->pySequence.attr("get_frame_by_id")(pKF->mnFrameId);  //最显著物体的检测结果：MonoSequence的detections_in_current_frame
+    int num_dets = detections.size(); 
     // No detections, return immediately
     if (num_dets == 0)
         return;
@@ -184,6 +184,8 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
                                                cv::Point(maskErrosion, maskErrosion));
         cv::erode(mask_cv, mask_erro, kernel);
 
+        // mvImObjectMasks.push_back(std::move(mask_cv));
+
         // get 2D feature points inside mask
         for (int i = 0; i < pKF->mvKeys.size(); i++)
         {
@@ -200,6 +202,32 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
             det->isGood = false;
         }
         pKF->mvpDetectedObjects.push_back(det);
+
+        // 获取bbox
+        auto bbox = py_det.attr("bbox").cast<Eigen::MatrixXf>();
+        std::cout << "[zhjd-debug] bbox:\n" << bbox << std::endl;
+        // int label = py_det.attr("bbox");
+
+        // Observation ob_2d;
+        // ob_2d.label = label;
+        // ob_2d.bbox = bbox;
+        // ob_2d.rate = det_vec(6);
+        // ob_2d.pFrame = pFrame;
+
+        // Observation3D ob_3d;
+        // ob_3d.pFrame = pFrame;
+        // if(pLocalObjects.size() == ob_num)
+        //     ob_3d.pObj = pLocalObjects[i];
+        // else 
+        //     ob_3d.pObj = NULL;
+
+        // Measurement m;
+        // m.measure_id = i;
+        // m.instance_id = -1; // not associated
+        // m.ob_2d = ob_2d;
+        // m.ob_3d = ob_3d;
+        // pFrame->meas.push_back(m);
+
     }
     pKF->nObj = pKF->mvpDetectedObjects.size();
     pKF->mvpMapObjects = vector<MapObject *>(pKF->nObj, static_cast<MapObject *>(NULL));

@@ -21,6 +21,8 @@
 
 #ifndef SYSTEM_H
 #define SYSTEM_H
+// [DSP与Elliposid整合] 释放GIL锁
+#define PYBIND11_NO_ASSERT_GIL_HELD_INCREF_DECREF
 
 #include<string>
 #include<thread>

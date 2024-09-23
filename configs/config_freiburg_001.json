@@ -32,5 +32,10 @@
     "distance": 10,
     "tilt": 30,
     "frame_size": 0.5
+  },
+  "image": {
+    "mRow": 540,
+    "mCol": 960,
+    "mEdge": 15
   }
 }

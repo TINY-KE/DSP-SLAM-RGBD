@@ -36,6 +36,8 @@
 #include <pybind11/embed.h>
 #include <pybind11/eigen.h>
 
+#include <core/Frame.h>
+
 namespace py = pybind11;
 
 class MapObject;
@@ -210,6 +212,11 @@ public:
     void EraseMapObjectMatch(MapObject *pMO);
     void ReplaceMapObjectMatch(const size_t &idx, MapObject* pMO);
 
+    // [ellipsoid]
+    // Store observations  ZHJD：这里存储的是2d观测和3d观测的结构体
+    EllipsoidSLAM::Measurements meas;
+
+    
     // The following variables need to be accessed trough a mutex to be thread safe.
 protected:
 

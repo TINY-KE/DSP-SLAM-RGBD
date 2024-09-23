@@ -38,9 +38,9 @@ class Frame:
         self.detector_2d = sequence.detector_2d
         self.min_mask_area = self.configs.min_mask_area
         if sequence.data_type == "Redwood":
-            self.object_class = "chairs"
+            self.object_class = ["chairs"]
         elif sequence.data_type == "Freiburg":
-            self.object_class = "cars"
+            self.object_class = ["cars"]
         self.frame_id = frame_id
         rgb_file = os.path.join(self.rgb_dir, "{:06d}".format(frame_id) + ".png")
         self.img_bgr = cv2.imread(rgb_file)
@@ -76,7 +76,7 @@ class Frame:
         # Get 2D Detection and background rays
         t1 = get_time()
         if self.online:
-            det_2d = self.detector_2d.make_prediction(self.img_bgr, object_class=self.object_class)
+            det_2d = self.detector_2d.make_prediction(self.img_bgr, object_classes=self.object_class)
         else:
             label_path2d = os.path.join(self.lbl2d_dir, "%06d.lbl" % self.frame_id)
             det_2d = torch.load(label_path2d)
@@ -86,15 +86,20 @@ class Frame:
         img_h, img_w, _ = self.img_rgb.shape
         masks_2d = det_2d["pred_masks"]
         bboxes_2d = det_2d["pred_boxes"]
+        labels_2d = det_2d["pred_labels"]
+        probs_2d = det_2d["pred_probs"]
 
         # If no 2D detections, return right away
         if masks_2d.shape[0] == 0:
             return
 
         # For redwood and freiburg cars, we only focus on the object in the middle
-        max_id = np.argmax(masks_2d.sum(axis=-1).sum(axis=-1))
+        # 这里只找出了masks_2d最大的一个实例
+        max_id = np.argmax(masks_2d.sum(axis=-1).sum(axis=-1))    #zhjd： 具有最大总像素数的对象的索引 max_id
         mask_max = masks_2d[max_id, ...].astype(np.float32) * 255.
         bbox_max = bboxes_2d[max_id, ...]
+        label_max = labels_2d[max_id, ...]
+        prob_max = probs_2d[max_id, ...]
 
         non_surface_pixels = self.pixels_sampler(bbox_max, mask_max.astype(np.bool8))
 
@@ -110,7 +115,8 @@ class Frame:
         instance.bbox = bbox_max
         instance.mask = mask_max
         instance.background_rays = background_rays_undist
-
+        instance.label = label_max
+        instance.prob = prob_max
         self.instances = [instance]
 
 
@@ -147,7 +153,8 @@ class MonoSequence:
         self.detections_in_current_frame = None
 
     def get_frame_by_id(self, frame_id):
-        self.current_frame = Frame(self, frame_id)
+        self.current_frame = Frame(self, frame_id)   
+        # 这里的self，对应了，class Frame:def __init__(self, sequence, frame_id)中的sequence
         self.current_frame.get_detections()
         self.detections_in_current_frame = self.current_frame.instances
         return self.detections_in_current_frame

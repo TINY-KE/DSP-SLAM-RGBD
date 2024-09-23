@@ -47,8 +47,11 @@ public:
     Observation ob_2d;
     Observation3D ob_3d;
 };
+
 typedef std::vector<Measurement> Measurements;
 
+
+// 廖子维的原版Frame，有需要的时候，往自己的Frame中搬。 但由于namespace 为 EllipsoidSLAM，因此对自己的程序没有影响。
 class Frame{
 
 public:
@@ -82,7 +85,7 @@ public:
     std::vector<g2o::ellipsoid*> mpLocalObjects; // local 3d ellipsoid
 
     // Store observations  ZHJD：这里存储的是2d观测和3d观测的结构体
-    Measurements meas;
+    EllipsoidSLAM::Measurements meas;
 
     // Store relations
     bool mbSetRelation;
