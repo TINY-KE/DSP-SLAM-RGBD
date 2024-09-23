@@ -1,0 +1,13 @@
+<launch>
+
+
+<node name="EllipsoidSLAM" type="ros_ellipsoid_slam_real" pkg="EllipsoidSLAM" args="$(find EllipsoidSLAM)/../../param/demo/kinect2.yaml" output="screen" >
+    <remap from="/camera/rgb/image" to="/kinect2/qhd/image_color_rect" />
+    <remap from="/camera/depth/image" to="/kinect2/qhd/image_depth_rect" />
+    <remap from="/odom" to="/RGBD/pose" />
+    <remap from="/darknet_ros/bounding_boxes" to="/darknet_ros/bounding_boxes" />
+
+</node>
+
+
+</launch>

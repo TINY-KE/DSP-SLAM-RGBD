@@ -1,0 +1,10 @@
+ <launch>
+      <!-- <node pkg="rosbag" type="play" name="rosbag" args="-d 2 $(find image_view)/test.bag"/> -->
+      <node name="extract_rgb" pkg="image_view" type="extract_images" respawn="false" output="screen" cwd="ROS_HOME">
+        <remap from="image" to="/kinect2/qhd/image_color_rect"/>
+      </node>
+
+      <!-- <node name="extract_depth" pkg="image_view" type="extract_images" respawn="false" output="screen" cwd="ROS_HOME">
+        <remap from="image" to="/kinect2/qhd/image_depth_rect"/>
+      </node> -->
+ </launch>

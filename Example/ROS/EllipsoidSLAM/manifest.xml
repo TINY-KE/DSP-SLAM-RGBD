@@ -1,0 +1,21 @@
+<package>
+  <description brief="EllipsoidSLAM">
+
+     EllipsoidSLAM
+
+  </description>
+  <author>LZW</author>
+  <license>GPLv3</license>
+  <depend package="roscpp"/>
+  <depend package="tf"/>
+  <depend package="sensor_msgs"/>
+  <depend package="image_transport"/> 
+  <!-- <depend package="cv_bridge"/>  -->
+  <depend package="darknet_ros_msgs"/>
+  <depend package="nav_msgs"/>
+
+
+</package>
+
+
+

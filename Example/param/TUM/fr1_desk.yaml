@@ -1,0 +1,153 @@
+%YAML:1.0
+Dataset.Type: "TUM"
+Dataset.Path.Root: "/disk/workspace/datasets/TUM/rgbd_dataset_freiburg1_desk"
+Dataset.Path.Map: "./dataset.pcd"
+
+# deg
+Optimizer.Edges.3DConstrain.PlaneAngle.Sigma: 100
+EllipsoidExtractor.SupportingPlaneFilter.DisThresh: 0.02
+
+# Set zero to close.
+Dataset.Timestamp.Start: 0
+Dataset.Timestamp.End: 0
+
+Dataset.UseGroundtruth: 1
+
+#10
+Dataset.Jumpframe: 5
+Dataset.Jumpframe.exp: 1
+
+# -----------------------------
+#   Monocular Infer
+# -----------------------------
+System.MonocularInfer.Open: 0
+
+Dataset.Path.PriTable: "./config/pritable.txt"
+
+MonocularInfer.Init.Dis: 5
+# Prior weight
+SemanticPrior.Weight: 1
+# Ground Plane Contrain weight
+SemanticPrior.GroundWeight: 2
+
+# ------------------------------
+#  Probabilistic Data Association
+# ------------------------------
+#
+
+# 创建新物体所需满足的概率
+DataAssociation.DPAlpha: 0.1
+DataAssociation.PlaneError.DisSigma: 0.1
+
+# ------------------------------------
+#  Single-frame ellipsoid estimation
+# ------------------------------------
+# Pointcloud segmentation parameters
+EllipsoidExtraction.Euclidean.ClusterTolerance: 0.1
+EllipsoidExtraction.Euclidean.MinClusterSize: 5
+EllipsoidExtraction.Euclidean.CenterDis: 0.5
+
+EllipsoidExtractor.Rotation.NormalVoter.KSearchNum: 35
+EllipsoidExtractor.MinNeighborsInRadius: 40
+EllipsoidExtractor.StatisticalOutlierRemoval.MeanK: 50
+
+Optimizer.SLAM.mode: 1
+
+# weights of 3d, 2d edges in optimization
+Optimizer.Edges.3DEllipsoid.Scale: 0.01
+Optimizer.Edges.3DEllipsoid.PlanesAsConstrains: 1
+Optimizer.Edges.2D.Scale: 0.1
+Optimizer.PartialObservation.Open: 1
+
+Optimizer.NonparametricDA.Num: 1
+Optimizer.Optimize.Num: 5
+
+# ------------------------------
+#  Symmetry Estimation
+# ------------------------------
+# Whether open symmetry estimation
+EllipsoidExtraction.Symmetry.Open: 0
+
+# Downsample grid size. Extremely influence the time and efficiency.
+EllipsoidExtraction.Symmetry.GridSize: 0.1
+
+# Parameters for symmetry probability
+SymmetrySolver.Sigma: 0.1
+
+# ----------------------------------
+# Symmetry types of semantic labels
+# ----------------------------------
+  
+# Please see the definitions in the function:
+# EllipsoidExtractor::LoadSymmetryPrior()
+
+# -------------------------------
+# Ground Plane Extraction
+# -------------------------------
+Plane.MinSize: 1000
+Plane.AngleThreshold: 3.0
+Plane.DistanceThreshold: 0.05
+Plane.MannualCheck.Open: 1
+
+Plane.ManhattanPlane.Open: 0
+
+# Mannual set
+Plane.Groundplane.param: !!opencv-matrix
+  rows: 1
+  cols: 4
+  dt: d
+  # data: [-0.00144757,   0.999998, -0.00141902,     1.16925]
+  # data: [0.0995169, -0.054672,  0.993613, -0.811224] # 4-10 before calibration
+  data: [0, 0, 1.0, -0.8]
+
+# Whether use the normal of the groundplane to constrain the ellipsoid
+Optimizer.Edges.GravityPrior.Open: 1
+Optimizer.Edges.GravityPrior.Scale: 100
+
+Optimizer.Edges.2DConstrain.Close: 0
+Optimizer.Edges.3DConstrain.Close: 0
+
+# ------------------------------
+# Other Parameters
+# ------------------------------
+# Bounding box filter
+Measurement.Border.Pixels: 30
+Measurement.LengthLimit.Pixels: 0
+Measurement.Probability.Thresh: 0
+
+# A observation will only be valid when the robot has a change of view.
+# Close it to consider every observations.
+Tracking.KeyFrameCheck.Close: 1
+
+# Visualization
+Visualization.Builder.Open: 1
+Visualization.Builder.Global.Open: 0
+
+#--------------------------------------------------------------------------------------------
+# Camera Parameters. 
+#--------------------------------------------------------------------------------------------
+
+# Camera calibration and distortion parameters (OpenCV) 
+Camera.fx: 517.306408
+Camera.fy: 516.469215
+Camera.cx: 318.643040
+Camera.cy: 255.313989
+
+Camera.width: 640
+Camera.height: 480
+
+Camera.scale: 5000.0
+#--------------------------------------------------------------------------------------------
+# Viewer Parameters
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2
+Viewer.CameraSize: 0.1
+Viewer.CameraLineWidth: 3
+Viewer.ViewpointX: 0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500
+Viewer.InverseCameraY: 0

@@ -2,6 +2,15 @@ cmake_policy(SET CMP0048 NEW)
 project("DSP-SLAM")
 cmake_minimum_required(VERSION 3.2)
 
+# set(OpenCV_DIR /home/robotlab/work/DSP-SLAM/Thirdparty/opencv/build)
+# set(Eigen3_DIR /home/robotlab/work/DSP-SLAM/Thirdparty/eigen/install/share/eigen3/cmake)
+# set(Pangolin_DIR /home/robotlab/work/DSP-SLAM/Thirdparty/Pangolin/build)
+# set(PCL_DIR  /home/robotlab/thirdparty_install/pcl-1.13/share/pcl-1.13)
+# set(CONDA_ENV "/home/robotlab/anaconda3/envs/dsp-slam")
+# set(PYTHON_LIBRARIES ${CONDA_ENV}/lib/libpython3.7m.so)  # Set Python libraries
+# set(PYTHON_INCLUDE_DIRS ${CONDA_ENV}/include/python3.7m)   # Set Python include directories
+# set(PYTHON_EXECUTABLE ${CONDA_ENV}/bin/python3.7)   # Set Python executable
+
 # c++ version
 set(CMAKE_CXX_STANDARD 17)
 
@@ -20,26 +29,103 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 ")
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
-find_package(OpenCV 3.2 REQUIRED)
+# find_package(OpenCV 3.2 REQUIRED)
+find_package(OpenCV 3.4.1 REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
 find_package(Pangolin REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+
+include_directories(/usr/include/vtk-7.1)
 set(PCL_DIR  /home/robotlab/thirdparty_install/pcl-1.13/share/pcl-1.13)
 FIND_PACKAGE( PCL REQUIRED )
+
 
 include_directories(
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/include/core
         ${PROJECT_SOURCE_DIR}/Thirdparty/g2o
         ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2
         ${EIGEN3_INCLUDE_DIR}
-        ${Pangolin_INCLUDE_DIRS}
-
+                
         ${PCL_INCLUDE_DIRS} 
+
+        ${Pangolin_INCLUDE_DIRS}
+        ${OPENGL_INCLUDE_DIRS}
+        ${GLUT_INCLUDE_DIRS}
+
+        ${OpenCV_INCLUDE_DIRS}
 )
+
+
+
+# 生成elliposid的库
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+add_library(utils SHARED
+        src/utils/matrix_utils.cpp
+        src/utils/dataprocess_utils.cpp
+        )
+target_link_libraries(utils
+${OpenCV_LIBS}
+)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+add_library(ELLIPOSID_LIB SHARED
+        src/core/Ellipsoid.cpp
+        src/core/Map.cpp
+        src/core/MapDrawer.cpp
+        src/core/Viewer.cpp
+        src/core/Initializer.cpp
+        src/core/Geometry.cpp
+        src/core/System.cpp
+        src/core/Tracking.cpp
+        src/core/FrameDrawer.cpp
+        src/core/Optimizer.cpp
+        src/core/Frame.cpp
+        src/core/Plane.cpp
+        src/core/DataAssociation.cpp
+        src/core/BasicEllipsoidEdges.cpp
+        src/core/NonparamDA.cpp
+        src/core/SupportingPlane.cpp
+        src/core/ConstrainPlane.cpp
+        src/core/SemanticLabel.cpp
+        src/core/PriorInfer.cpp
+        )
+target_link_libraries(ELLIPOSID_LIB
+        ${OpenCV_LIBS}
+        ${EIGEN3_LIBS}
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+        ${Pangolin_LIBRARIES}
+        ${OPENGL_LIBRARIES} 
+        ${GLUT_LIBRARIES}
+        utils
+        Config
+        symmetry
+        EllipsoidExtractor
+        PlaneExtractor
+        dense_builder
+        Polygon
+        Relationship
+        ) 
+# add modules
+add_subdirectory(src/tum_rgbd)
+add_subdirectory(src/dense_builder)
+add_subdirectory(src/symmetry)
+add_subdirectory(src/config)
+add_subdirectory(src/pca)
+add_subdirectory(src/plane)
+add_subdirectory(src/Polygon)
+add_subdirectory(src/Relationship)
+
+
+
 
 # You need to set to your own Python paths
 add_subdirectory(pybind11)
 
+
+
+# 生成DSPSLAM的库
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 add_library(${PROJECT_NAME} SHARED
         src/System.cc
