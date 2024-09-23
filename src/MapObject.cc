@@ -24,7 +24,7 @@ namespace ORB_SLAM2
 
 int MapObject::nNextId = 0;
 
-MapObject::MapObject(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode, KeyFrame *pRefKF, Map *pMap) :
+MapObject::MapObject(const Eigen::Matrix4f &T, const Eigen::Matrix<float, 64, 1> &vCode, KeyFrame *pRefKF, Map *pMap) :
         mpRefKF(pRefKF), mpNewestKF(pRefKF), mnBALocalForKF(0), mnAssoRefID(0), mnFirstKFid(pRefKF->mnId),
         mnCorrectedByKF(0), mnCorrectedReference(0), mnLoopObjectForKF(0), mnBAGlobalForKF(0),
         w(1.), h(1.), l(1.), mbBad(false), mbDynamic(false), mpMap(pMap), nObs(0), mRenderId(-1)
@@ -60,7 +60,7 @@ MapObject::MapObject(KeyFrame *pRefKF, Map *pMap) :
     mnId = nNextId++;
     scale = 1.;
     invScale = 1.;
-    vShapeCode = Eigen::Vector<float, 64>::Zero();
+    vShapeCode = Eigen::Matrix<float, 64, 1>::Zero();
 }
 
 void MapObject::AddObservation(KeyFrame *pKF, int idx)
@@ -223,13 +223,13 @@ void MapObject::SetObjectPoseSE3(const Eigen::Matrix4f &Two)
     Sim3Tow = Sim3Two.inverse();
 }
 
-void MapObject::SetShapeCode(const Eigen::Vector<float, 64> &code)
+void MapObject::SetShapeCode(const Eigen::Matrix<float, 64, 1> &code)
 {
     unique_lock<mutex> lock(mMutexObject);
     vShapeCode = code;
 }
 
-void MapObject::UpdateReconstruction(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode)
+void MapObject::UpdateReconstruction(const Eigen::Matrix4f &T, const Eigen::Matrix<float, 64, 1> &vCode)
 {
     SetObjectPoseSim3(T);
     SetShapeCode(vCode);
@@ -466,7 +466,7 @@ Eigen::Matrix4f MapObject::GetPoseSE3()
     return SE3Two;
 }
 
-Eigen::Vector<float, 64> MapObject::GetShapeCode()
+Eigen::Matrix<float, 64, 1> MapObject::GetShapeCode()
 {
     unique_lock<mutex> lock(mMutexObject);
     return vShapeCode;

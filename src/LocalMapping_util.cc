@@ -112,7 +112,7 @@ void LocalMapping::GetNewObservations()
             // error
             Eigen::Vector3f dist3D = SE3Tco.topRightCorner<3, 1>() - iniSE3Tco.topRightCorner<3, 1>();
             Eigen::Vector2f dist2D; dist2D << dist3D[0], dist3D[2];
-            Eigen::Vector<double , 6> e = (Tco.inverse() * Zco).log();
+            Eigen::Matrix<double , 6, 1> e = (Tco.inverse() * Zco).log();
 
             if (pMO->isDynamic()) // if associated with a dynamic object
             {
@@ -188,7 +188,7 @@ void LocalMapping::CreateNewMapObjects()
         det->SetPoseMeasurementSim3(Sim3Tco);
         // Sim3, SE3, Sim3
         Eigen::Matrix4f Sim3Two = SE3Twc * Sim3Tco;
-        auto code = pyMapObject.attr("code").cast<Eigen::Vector<float, 64>>();
+        auto code = pyMapObject.attr("code").cast<Eigen::Matrix<float, 64, 1>>();
         auto pNewObj = new MapObject(Sim3Two, code, mpCurrentKeyFrame, mpMap);
 
         auto pyMesh = pyMeshExtractor.attr("extract_mesh_from_code")(code);
@@ -411,15 +411,15 @@ void LocalMapping::ProcessDetectedObjects()
             // Sim3, SE3, Sim3
             Eigen::Matrix4f Sim3Two = SE3Twc * Sim3Tco;
             int code_len = pyOptimizer.attr("code_len").cast<int>();
-            Eigen::Vector<float, 64> code = Eigen::VectorXf::Zero(64);
+            Eigen::Matrix<float, 64, 1> code = Eigen::VectorXf::Zero(64);
             if (code_len == 32)
             {
-                auto code_32 = pyMapObject.attr("code").cast<Eigen::Vector<float, 32>>();
+                auto code_32 = pyMapObject.attr("code").cast<Eigen::Matrix<float, 32, 1>>();
                 code.head(32) = code_32;
             }
             else
             {
-                code = pyMapObject.attr("code").cast<Eigen::Vector<float, 64>>();
+                code = pyMapObject.attr("code").cast<Eigen::Matrix<float, 64, 1>>();
             }
 
             pMO->UpdateReconstruction(Sim3Two, code);

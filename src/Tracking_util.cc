@@ -43,7 +43,7 @@ void Tracking::GetObjectDetectionsLiDAR(KeyFrame *pKF) {
         if (rays.is_none()) {
             // std::cout << "No 2D masks associated!" << std::endl;
             rays_mat = Eigen::Matrix<float, 0, 0>::Zero();
-            depth = Eigen::Vector<float, 0>::Zero();
+            depth = Eigen::Matrix<float, 0, 1>::Zero();
         } else {
             rays_mat = rays.cast<Eigen::MatrixXf>();
             depth = det.attr("depth").cast<Eigen::VectorXf>();

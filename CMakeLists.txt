@@ -23,6 +23,8 @@ LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 find_package(OpenCV 3.2 REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
 find_package(Pangolin REQUIRED)
+set(PCL_DIR  /home/robotlab/thirdparty_install/pcl-1.13/share/pcl-1.13)
+FIND_PACKAGE( PCL REQUIRED )
 
 include_directories(
         ${PROJECT_SOURCE_DIR}
@@ -31,6 +33,8 @@ include_directories(
         ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2
         ${EIGEN3_INCLUDE_DIR}
         ${Pangolin_INCLUDE_DIRS}
+
+        ${PCL_INCLUDE_DIRS} 
 )
 
 # You need to set to your own Python paths
@@ -77,6 +81,7 @@ target_link_libraries(${PROJECT_NAME}
         ${Pangolin_LIBRARIES}
         ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
         ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+        ${PCL_LIBRARY_DIRS}
         )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})

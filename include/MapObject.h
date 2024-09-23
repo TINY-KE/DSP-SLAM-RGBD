@@ -31,7 +31,7 @@ class Frame;
 
 class MapObject {
 public:
-    MapObject(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode, KeyFrame *pRefKF, Map *pMap);
+    MapObject(const Eigen::Matrix4f &T, const Eigen::Matrix<float, 64, 1> &vCode, KeyFrame *pRefKF, Map *pMap);
     MapObject(KeyFrame *pRefKF, Map *pMap);
 
     void AddObservation(KeyFrame *pKF, int idx);
@@ -39,11 +39,11 @@ public:
     std::map<KeyFrame*,size_t> GetObservations();
     void SetObjectPoseSim3(const Eigen::Matrix4f &Two);
     void SetObjectPoseSE3(const Eigen::Matrix4f &Two);
-    void SetShapeCode(const Eigen::Vector<float, 64> &code);
-    void UpdateReconstruction(const Eigen::Matrix4f &T, const Eigen::Vector<float, 64> &vCode);
+    void SetShapeCode(const Eigen::Matrix<float, 64, 1> &code);
+    void UpdateReconstruction(const Eigen::Matrix4f &T, const Eigen::Matrix<float, 64, 1> &vCode);
     Eigen::Matrix4f GetPoseSim3();
     Eigen::Matrix4f GetPoseSE3();
-    Eigen::Vector<float, 64> GetShapeCode();
+    Eigen::Matrix<float, 64, 1> GetShapeCode();
     int GetIndexInKeyFrame(KeyFrame *pKF);
     void EraseObservation(KeyFrame *pKF);
     void SetBadFlag();
@@ -76,7 +76,7 @@ public:
     Eigen::Vector3f two;
     float scale;
     float invScale;
-    Eigen::Vector<float, 64> vShapeCode;
+    Eigen::Matrix<float, 64, 1> vShapeCode;
 
     // Keyframes observing the point and associated index in keyframe
     std::map<KeyFrame *, size_t> mObservations;

@@ -147,6 +147,7 @@ if [[ $* == *--create-conda-env* ]] ; then
   conda env create -f environment_cuda113.yml
 fi # --create-conda-env
 
+source ~/conda.sh 
 conda_base=$(conda info --base)
 source "$conda_base/etc/profile.d/conda.sh"
 conda activate dsp-slam
