@@ -1,4 +1,4 @@
-
+[DSP与Elliposid整合]
 
 
 # 整合DSP与Elliposid中的过程记录
@@ -27,5 +27,18 @@
 # G2O的编译指令
 cmake -DEigen3_DIR="/home/robotlab/thirdparty/for_dspslam/eigen/install/share/eigen3/cmake" ..
 
+# BDOW2的编译指令
+cmake -DOpenCV_DIR="/home/robotlab/work/DSP-SLAM/Thirdparty/opencv/build" ..
+
 # commit 记账
-  ## 
+  ## 整合1: Frame语义提取中包含了bbox
+  + Frame语义提取中包含了bbox
+  + 修改Detection2D函数，实现同时识别多个物体，且能获取语义标签label，根据self.instances = [instance]，可知返回的detections为一个数组，其中每一个py_det为一个detect整合包（包含mask、bbox、label）
+  + KeyFrame中加入EllipsoidSLAM::Measurements meas， 可以用于存储bbox
+  + 下一步，准备利用Tracking::InferObjectsWithSemanticPrior  生成Prior椭球体。
+
+
+
+
+     mpOptimizer->SetGroundPlane(groundplane.param);
+     

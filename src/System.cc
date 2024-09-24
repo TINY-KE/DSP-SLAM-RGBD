@@ -95,6 +95,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const st
     string pyCfgPath = fSettings["DetectorConfigPath"].string();
     pyCfg = io_utils.attr("get_configs")(pyCfgPath);
     pyDecoder = io_utils.attr("get_decoder")(pyCfg);
+    cout << "7/8 pySequence = reconstruct.get_sequence(strSequencePath, pyCfg):  strSequencePath: "<< strSequencePath <<",  pyCfgPath:"<<pyCfgPath<< std::endl;
     pySequence = py::module::import("reconstruct").attr("get_sequence")(strSequencePath, pyCfg);
     InitThread();
 
