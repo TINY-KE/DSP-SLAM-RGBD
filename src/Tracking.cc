@@ -462,6 +462,7 @@ void Tracking::Track()
             mlpTemporalPoints.clear();
 
             // Check if we need to insert a new keyframe
+            // 只在关键帧中进行物体检测
             if(NeedNewKeyFrame())
             {
                 cout << "New Keyframe" << endl;
@@ -1095,6 +1096,7 @@ void Tracking::CreateNewKeyFrame()
             // AssociateObjects(pKF);
             AssociateObjectsByProjection(pKF);
         }
+        
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
         double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();

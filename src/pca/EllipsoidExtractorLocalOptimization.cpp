@@ -10,7 +10,7 @@
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
 
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 
 g2o::ellipsoid EllipsoidExtractor::OptimizeEllipsoidUsingPlanes(g2o::ellipsoid &e_in, MatrixXd& mPlanesParam)

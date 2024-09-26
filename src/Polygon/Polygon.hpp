@@ -9,7 +9,7 @@
 
 #include <cxcore.h>
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 	
 float distPoint( CvPoint p1, CvPoint p2 ) ;

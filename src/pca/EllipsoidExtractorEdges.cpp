@@ -2,8 +2,9 @@
 #include "include/core/Plane.h"
 
 // ***************** DEBUG 可视化 ***************
-#include "include/core/Map.h"
-extern EllipsoidSLAM::Map* expMap;
+#include "include/Map.h"
+
+extern ORB_SLAM2::Map* expMap;
 
 bool g_bVisualize = false;
 // *********************************************
@@ -120,8 +121,9 @@ namespace g2o{
             Vector3d point_w = homo_to_real_coord_vec<double>(transformMat * real_to_homo_coord_vec<double>(point));
 
             // 1) 可视化这个最近点.
-            EllipsoidSLAM::PointCloud* pCloud = new EllipsoidSLAM::PointCloud;
-            EllipsoidSLAM::PointXYZRGB p;
+            ORB_SLAM2::PointCloud* pCloud = new ORB_SLAM2::PointCloud;
+            
+            ORB_SLAM2::PointXYZRGB p;
             p.x = point_w[0];
             p.y = point_w[1];
             p.z = point_w[2];
@@ -131,7 +133,8 @@ namespace g2o{
             p.g = 0;
             p.b = 0;
             pCloud->push_back(p);
-            expMap->AddPointCloudList("Debug.DistancePoint", pCloud, 1);
+            // [反向][整合]
+            // expMap->AddPointCloudList("Debug.DistancePoint", pCloud, 1);
 
             // 2) 连接最近点到平面的点.
             // todo
@@ -421,7 +424,7 @@ namespace g2o{
         double error;
         
         // 1) 判断平面是否与椭球体相交
-        bool bCross = EllipsoidSLAM::JudgeCross(pl, e);
+        bool bCross = ORB_SLAM2::JudgeCross(pl, e);
         // std::cout << "bCross : " << bCross << std::endl;
 
         // 1.1 若相交, 则error为0
@@ -447,7 +450,7 @@ namespace g2o{
 
 } // g2o
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 
     // 传入坐标系: 都为世界坐标系
@@ -464,8 +467,8 @@ namespace EllipsoidSLAM
         // 转到世界系
         // 将 点由椭球体的局部系 转换到世界系
         g2o::SE3Quat Twe = e.pose;
-        Matrix4d transformMat = Twe.to_homogeneous_matrix();
-        Vector3d point_w = homo_to_real_coord_vec<double>(transformMat * real_to_homo_coord_vec<double>(pointOnEllipsoidNearPlane));
+        Eigen::Matrix4d transformMat = Twe.to_homogeneous_matrix();
+        Eigen::Vector3d point_w = homo_to_real_coord_vec<double>(transformMat * real_to_homo_coord_vec<double>(pointOnEllipsoidNearPlane));
 
         bool flag_center = (pl.distanceToPoint(center, true) > 0);
         bool flag_poe = (pl.distanceToPoint(point_w, true) > 0);

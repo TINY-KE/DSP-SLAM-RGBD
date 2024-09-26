@@ -153,8 +153,8 @@ public:
     int miVisualGroup; // For Visualization only
 private:
 
-    Eigen::Vector3d GetLineFromCenterAngle(const Eigen::Vector2d center, double angle);
-    Eigen::Vector4d LineToPlane(const Eigen::Vector3d line);
+    // Eigen::Vector3d GetLineFromCenterAngle(const Eigen::Vector2d center, double angle);
+    // Eigen::Vector4d LineToPlane(const Eigen::Vector3d line);
 
 };
 

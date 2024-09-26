@@ -11,7 +11,7 @@ using namespace Eigen;
 #include "SymmetrySolver.h"
 #include "BorderExtractor.h"
 
-namespace EllipsoidSLAM {
+namespace ORB_SLAM2 {
 
 class SymmetryOutputData
 {
@@ -49,7 +49,7 @@ class Symmetry {
     public:
         void SetGroundPlane(Vector4d& normal);
 
-        void SetBorders(EllipsoidSLAM::PointCloud* pBorders);       
+        void SetBorders(ORB_SLAM2::PointCloud* pBorders);       
         void SetConfigResolution(double res);
         double GetConfigResolution();
         void SetConfigFilterPointNum(int num);

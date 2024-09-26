@@ -1,6 +1,8 @@
 cmake-build-debug/
 cmake-build-release/
 build/
+build-no-march=native/
+build_c14/
 reconstruct/.ipynb_checkpoints/
 reconstruct/__pycache__/
 reconstruct/experiments/

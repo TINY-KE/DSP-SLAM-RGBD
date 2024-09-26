@@ -482,7 +482,7 @@ namespace g2o
         return e.scale[0]*e.scale[1]*e.scale[2]*8;
     }
 
-    void OutputPolygon(EllipsoidSLAM::Polygon& polygon, double resolution)
+    void OutputPolygon(ORB_SLAM2::Polygon& polygon, double resolution)
     {
         int num = polygon.n;
         for( int i=0;i<num;i++)
@@ -513,7 +513,7 @@ namespace g2o
         // 旧版本: 使用 Polygon 库
         // *************************
         // Use polygon to calculate the intersection
-        EllipsoidSLAM::Polygon polygon1, polygon2;
+        ORB_SLAM2::Polygon polygon1, polygon2;
         double resolution = 0.001;  // m / resolution = pixel
         polygon1.add(cv::Point(a1/resolution, b1/resolution));    // cvPoint only accepts integer, so use resolution to map meter to pixel ( 0.01 resolution means: 1pixel = 0.01m )
         polygon1.add(cv::Point(-a1/resolution, b1/resolution)); 
@@ -533,8 +533,8 @@ namespace g2o
         }
 
         // calculate the intersection
-        EllipsoidSLAM::Polygon interPolygon;
-        EllipsoidSLAM::intersectPolygon(polygon1, polygon2, interPolygon);
+        ORB_SLAM2::Polygon interPolygon;
+        ORB_SLAM2::intersectPolygon(polygon1, polygon2, interPolygon);
 
         // eliminate resolution.
         double inter_area = interPolygon.area();

@@ -1,8 +1,8 @@
 #include "Relationship.h"
-#include "include/core/Frame.h"
+#include "include/Frame.h"
 
 using namespace std;
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
     bool sort_plane_dis(pair<double,g2o::plane*>&p1, pair<double,g2o::plane*>&p2)
     {
@@ -217,27 +217,28 @@ namespace EllipsoidSLAM
         return vec;
     }
 
-    bool Relation::InitRelation(const Eigen::VectorXd& vec, EllipsoidSLAM::Frame* pFrameIn)
-    {
-        // 根据 obj_id, plane_id 初始化 pPlane, pEllipsoid 的值.
+    // [反向][整合]
+    // bool Relation::InitRelation(const Eigen::VectorXd& vec, ORB_SLAM2::Frame* pFrameIn)
+    // {
+    //     // 根据 obj_id, plane_id 初始化 pPlane, pEllipsoid 的值.
 
-        this->pFrame = pFrameIn;
-        LoadFromVec(vec);
+    //     this->pFrame = pFrameIn;
+    //     LoadFromVec(vec);
 
-        if(pFrameIn->mpLocalObjects.size() <= obj_id)
-        {
-            std::cout << "Wrong size of mpLocalObjects in pFrameIn." << std::endl;
-            std::cout << "Objects in frame : " << pFrameIn->mpLocalObjects.size() << std::endl;
-            std::cout << "obj_id : " << obj_id << std::endl;
-            std::cout << "vec : " << vec.transpose() << std::endl;
-            std::cout << "timestamp of frame : " << std::to_string(pFrameIn->timestamp) << std::endl;
-            return false;
-        }
+    //     if(pFrameIn->mpLocalObjects.size() <= obj_id)
+    //     {
+    //         std::cout << "Wrong size of mpLocalObjects in pFrameIn." << std::endl;
+    //         std::cout << "Objects in frame : " << pFrameIn->mpLocalObjects.size() << std::endl;
+    //         std::cout << "obj_id : " << obj_id << std::endl;
+    //         std::cout << "vec : " << vec.transpose() << std::endl;
+    //         // std::cout << "timestamp of frame : " << std::to_string(pFrameIn->timestamp) << std::endl;
+    //         return false;
+    //     }
 
-        this->pEllipsoid = pFrameIn->mpLocalObjects[obj_id];
+    //     this->pEllipsoid = pFrameIn->mpLocalObjects[obj_id];
 
-        return true;
-    }
+    //     return true;
+    // }
 
     void Relation::LoadFromVec(const Eigen::VectorXd& vec)
     {
@@ -262,4 +263,4 @@ namespace EllipsoidSLAM
         return 4 + 4;
     }
 
-} // namespace EllipsoidSLAM
+} // namespace ORB_SLAM2

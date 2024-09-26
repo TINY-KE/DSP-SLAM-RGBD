@@ -1,11 +1,11 @@
 #include "core/Geometry.h"
 #include "utils/matrix_utils.h"
 #include "utils/dataprocess_utils.h"
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 
     // Generates all points in the depth image as point cloud.
-    PointCloud getPointCloud(cv::Mat &depth, cv::Mat &rgb, Eigen::VectorXd &detect, EllipsoidSLAM::camera_intrinsic &camera) {
+    PointCloud getPointCloud(cv::Mat &depth, cv::Mat &rgb, Eigen::VectorXd &detect, ORB_SLAM2::camera_intrinsic &camera) {
         PointCloud cloud;
 
         int x1 = 0;

@@ -1,6 +1,6 @@
 #include "Polygon.hpp"
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 float distPoint(CvPoint2D32f v,CvPoint2D32f w) { 
 	return sqrtf((v.x - w.x)*(v.x - w.x) + (v.y - w.y)*(v.y - w.y)) ;

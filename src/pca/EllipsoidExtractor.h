@@ -7,7 +7,7 @@
 
 #include <core/Ellipsoid.h>
 #include <core/Geometry.h>
-#include <core/Map.h>
+#include <Map.h>
 #include <core/BasicEllipsoidEdges.h>
 
 #include <src/symmetry/PointCloudFilter.h>
@@ -25,7 +25,7 @@
 typedef pcl::PointXYZ PointType;
 typedef pcl::Normal NormalType;
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 
 struct PCAResult
@@ -78,8 +78,8 @@ public:
 
     bool GetResult();   // get extraction result.
     SymmetryOutputData GetSymmetryOutputData();  // get the detail of symmetry estimation
-    EllipsoidSLAM::PointCloud* GetPointCloudInProcess();   // get the object point cloud
-    EllipsoidSLAM::PointCloud* GetPointCloudDebug();   // get the debug point cloud before Eucliden filter
+    ORB_SLAM2::PointCloud* GetPointCloudInProcess();   // get the object point cloud
+    ORB_SLAM2::PointCloud* GetPointCloudDebug();   // get the debug point cloud before Eucliden filter
 
     void SetExtractionMethod(int method);
     void SetManhattanPlanes(const std::vector<g2o::plane*> vpPlanes);
@@ -93,10 +93,10 @@ private:
 
     void ApplyGravityPrior(PCAResult &data);    // add the supporting groundplane prior to calibrate the rotation matrix
 
-    EllipsoidSLAM::PointCloud* ApplyEuclideanFilter(EllipsoidSLAM::PointCloud* pCloud, Vector3d &center);   // apply euclidean filter to get the object points
-    EllipsoidSLAM::PointCloud* ApplyPlaneFilter(EllipsoidSLAM::PointCloud* pCloud, double z);    // filter points lying under the supporting plane
+    ORB_SLAM2::PointCloud* ApplyEuclideanFilter(ORB_SLAM2::PointCloud* pCloud, Vector3d &center);   // apply euclidean filter to get the object points
+    ORB_SLAM2::PointCloud* ApplyPlaneFilter(ORB_SLAM2::PointCloud* pCloud, double z);    // filter points lying under the supporting plane
 
-    EllipsoidSLAM::PointCloud* ApplySupportingPlaneFilter(EllipsoidSLAM::PointCloud* pCloud);   
+    ORB_SLAM2::PointCloud* ApplySupportingPlaneFilter(ORB_SLAM2::PointCloud* pCloud);   
 
     bool GetCenter(cv::Mat& depth, Eigen::Vector4d& bbox, Eigen::VectorXd &pose, camera_intrinsic& camera, Vector3d& center); // get a coarse 3d center of the object
     double getDistanceFromPointToCloud(Vector3d& point, pcl::PointCloud<pcl::PointXYZ>::Ptr pCloud);  // get the minimum distance between a point and a pointcloud
@@ -109,19 +109,19 @@ private:
     // this function will be called if groundplane is set when aligning Z axis
     Eigen::Matrix3d calibRotMatAccordingToGroundPlane( Matrix3d& rotMat, const Vector3d& normal);
 
-    void VisualizePointCloud(const string& name, EllipsoidSLAM::PointCloud* pCloud, const Vector3d &color = Vector3d(-1,-1,-1), int point_size = 2);
+    void VisualizePointCloud(const string& name, ORB_SLAM2::PointCloud* pCloud, const Vector3d &color = Vector3d(-1,-1,-1), int point_size = 2);
     void VisualizeEllipsoid(const string& name, g2o::ellipsoid* pObj);
 
-    PCAResult ProcessPCANormalized(EllipsoidSLAM::PointCloud* pObject);
+    PCAResult ProcessPCANormalized(ORB_SLAM2::PointCloud* pObject);
 
-    g2o::ellipsoid GetEllipsoidFromNomalizedPointCloud(EllipsoidSLAM::PointCloud* pCloud);
+    g2o::ellipsoid GetEllipsoidFromNomalizedPointCloud(ORB_SLAM2::PointCloud* pCloud);
 
     PCAResult PCA(pcl::PointCloud<PointType>::Ptr& pCloudPCL);
     double NormalVoter(pcl::PointCloud<PointType>::Ptr& pCloudPCL);
 
     g2o::ellipsoid OptimizeEllipsoidUsingPlanes(g2o::ellipsoid &e_in, MatrixXd& mPlanesParam);
 
-    EllipsoidSLAM::PointCloud* ApplyMHPlanesFilter(EllipsoidSLAM::PointCloud* pCloud, std::vector<g2o::plane*>& vpPlanes);
+    ORB_SLAM2::PointCloud* ApplyMHPlanesFilter(ORB_SLAM2::PointCloud* pCloud, std::vector<g2o::plane*>& vpPlanes);
 
     g2o::SE3Quat GenerateGravityCoordinate(const Vector3d& center, const Vector3d& gravity_normal);
 private:
@@ -129,8 +129,8 @@ private:
 
     int miEuclideanFilterState; // Euclidean filter result:  1 no clusters 2: not the biggest cluster 3: fail to find valid cluster 0: success
     int miSystemState;  // 0: normal 1: no depth value for center point 2: fail to filter. 3: no point left after downsample
-    EllipsoidSLAM::PointCloud* mpPoints;    // store object points
-    EllipsoidSLAM::PointCloud* mpPointsDebug;    // store points for debugging ( points before Euclidean filter)
+    ORB_SLAM2::PointCloud* mpPoints;    // store object points
+    ORB_SLAM2::PointCloud* mpPointsDebug;    // store points for debugging ( points before Euclidean filter)
 
     // supporting plane
     bool mbSetPlane;    

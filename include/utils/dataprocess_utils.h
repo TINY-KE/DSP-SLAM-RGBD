@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ std::vector<std::vector<std::string>> readStringFromFile(const char* fileName, i
 bool saveMatToFile(Eigen::MatrixXd &matIn, const char* fileName);
 
 // get all the file names under a dir. 
-void GetFileNamesUnderDir(string path,vector<string>& filenames);
+void GetFileNamesUnderDir(string path,std::vector<string>& filenames);
 string splitFileNameFromFullDir(string &s, bool bare = false);
 
 // sort file names in ascending order 

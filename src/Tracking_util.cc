@@ -176,6 +176,11 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
         auto py_det = detections[detected_idx];
         det->background_rays = py_det.attr("background_rays").cast<Eigen::MatrixXf>();
         auto mask = py_det.attr("mask").cast<Eigen::MatrixXf>();
+        // det->bbox = py_det.attr("bbox").cast<Eigen::Vector4d>();
+        // std::cout << "[zhjd-debug] bbox:\n" << det->bbox << std::endl;
+        // det->label = py_det.attr("label").cast<int>();
+        // det->prob = py_det.attr("prob").cast<double>();
+
         cv::Mat mask_cv;
         cv::eigen2cv(mask, mask_cv);
         // cv::imwrite("mask.png", mask_cv);
@@ -204,28 +209,6 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
         }
         pKF->mvpDetectedObjects.push_back(det);
 
-        // 获取bbox
-        // auto bbox = py_det.attr("bbox").cast<Eigen::MatrixXf>();
-        auto bbox = py_det.attr("bbox").cast<Eigen::Vector4d>();
-        // Eigen::Vector4d bbox = bboxs.col(0);
-        std::cout << "[zhjd-debug] bbox:\n" << bbox << std::endl;
-        int label = py_det.attr("label").cast<int>();
-
-        EllipsoidSLAM::Observation ob_2d;
-        ob_2d.label = label;
-        ob_2d.bbox = bbox;
-        // ob_2d.rate = det_vec(6);
-        // ob_2d.pFrame = pFrame;
-
-        EllipsoidSLAM::Observation3D ob_3d;
-
-        EllipsoidSLAM::Measurement m;
-        m.measure_id = detected_idx;
-        m.instance_id = -1; // not associated
-        m.ob_2d = ob_2d;
-        m.ob_3d = ob_3d;
-
-        pKF->meas.push_back(m);
     }
 
     pKF->nObj = pKF->mvpDetectedObjects.size();

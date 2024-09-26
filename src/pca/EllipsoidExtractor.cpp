@@ -28,10 +28,10 @@
 #include <src/config/Config.h>
 #include <core/Geometry.h>
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 
-bool compare_cloud_with_z(EllipsoidSLAM::PointXYZRGB &p1, EllipsoidSLAM::PointXYZRGB &p2)
+bool compare_cloud_with_z(ORB_SLAM2::PointXYZRGB &p1, ORB_SLAM2::PointXYZRGB &p2)
 {
     return p1.z < p2.z;
 }
@@ -134,7 +134,7 @@ pcl::PointCloud<PointType>::Ptr EllipsoidExtractor::ExtractPointCloud(cv::Mat& d
     sor.filter (*cloud_after_filter);
 
     // std::cout << "filter before/after points: " << inputPclPtr->points.size() << " / " << cloud_after_filter->points.size() << std::endl;
-    EllipsoidSLAM::PointCloud* pCloudFiltered = pclXYZToQuadricPointCloudPtr(cloud_after_filter);
+    ORB_SLAM2::PointCloud* pCloudFiltered = pclXYZToQuadricPointCloudPtr(cloud_after_filter);
     clock_t time_1_1_outliers_filter_end = clock();
     
     // transform to the world coordinate.
@@ -381,12 +381,12 @@ g2o::ellipsoid EllipsoidExtractor::EstimateLocalEllipsoid(cv::Mat& depth, Eigen:
     ApplyGravityPrior(data);
 
     Vector3d center = data.center;  // center point of the object points from PCA.
-    EllipsoidSLAM::PointCloud* pObjectClearCloud = pclXYZToQuadricPointCloudPtr(pCloudPCL);
-    // EllipsoidSLAM::PointCloud* pObjectCloud = pObjectClearCloud;    // world coordinate
+    ORB_SLAM2::PointCloud* pObjectClearCloud = pclXYZToQuadricPointCloudPtr(pCloudPCL);
+    // ORB_SLAM2::PointCloud* pObjectCloud = pObjectClearCloud;    // world coordinate
 
     // downsample to estimate symmetry.
     double grid_size_for_symmetry = Config::ReadValue<double>("EllipsoidExtraction.Symmetry.GridSize");
-    EllipsoidSLAM::PointCloud* pObjectCloud = new EllipsoidSLAM::PointCloud;
+    ORB_SLAM2::PointCloud* pObjectCloud = new ORB_SLAM2::PointCloud;
     DownSamplePointCloudOnly(*pObjectClearCloud, *pObjectCloud, grid_size_for_symmetry);
     VisualizePointCloud("Points For Sym", pObjectCloud, Vector3d(0.5,0.5,0.0), 6);
 
@@ -410,7 +410,7 @@ g2o::ellipsoid EllipsoidExtractor::EstimateLocalEllipsoid(cv::Mat& depth, Eigen:
     pSE3Two->setRotation(quat_wo);
     pSE3Two->setTranslation(center);    // it is the center of the old object points; it's better to use the center of the new complete points
     g2o::SE3Quat SE3Tow(pSE3Two->inverse());
-    EllipsoidSLAM::PointCloud* pObjectCloudNormalized = transformPointCloud(pObjectCloud, &SE3Tow); // normalized coordinate
+    ORB_SLAM2::PointCloud* pObjectCloudNormalized = transformPointCloud(pObjectCloud, &SE3Tow); // normalized coordinate
     // VisualizePointCloud("normalizedPoints", pObjectCloudNormalized, Vector3d(0,0.4,0), 2);
 
     clock_t time_2_partPCA = clock();
@@ -515,7 +515,7 @@ g2o::ellipsoid EllipsoidExtractor::EstimateLocalEllipsoid(cv::Mat& depth, Eigen:
             // VisualizePointCloud("WithSymNormalized", pObjectCloudNormalized, Vector3d(0,0,0.4), 2);
 
             // transform to the world
-            EllipsoidSLAM::PointCloud* pObjectCloudWithSymWorld = EllipsoidSLAM::transformPointCloud(pObjectCloudNormalized, pSE3Two);
+            ORB_SLAM2::PointCloud* pObjectCloudWithSymWorld = ORB_SLAM2::transformPointCloud(pObjectCloudNormalized, pSE3Two);
             VisualizePointCloud("Mirrored Points", pObjectCloudWithSymWorld, Vector3d(0,1.0,0.2), 8);
 
         }   // end of symmetry type
@@ -558,7 +558,7 @@ g2o::ellipsoid EllipsoidExtractor::EstimateLocalEllipsoid(cv::Mat& depth, Eigen:
     return e_local;
 }
 
-PCAResult EllipsoidExtractor::ProcessPCANormalized(EllipsoidSLAM::PointCloud* pObject)
+PCAResult EllipsoidExtractor::ProcessPCANormalized(ORB_SLAM2::PointCloud* pObject)
 {
     PCAResult data;
     double x,y,z;
@@ -612,20 +612,20 @@ SymmetryOutputData EllipsoidExtractor::GetSymmetryOutputData()
     return mSymmetryOutputData;
 }
 
- EllipsoidSLAM::PointCloud* EllipsoidExtractor::GetPointCloudInProcess()
+ ORB_SLAM2::PointCloud* EllipsoidExtractor::GetPointCloudInProcess()
  {
      return mpPoints;
  }
 
- EllipsoidSLAM::PointCloud* EllipsoidExtractor::GetPointCloudDebug()
+ ORB_SLAM2::PointCloud* EllipsoidExtractor::GetPointCloudDebug()
  {
      return mpPointsDebug;
  }
  
  // pointcloud process
-EllipsoidSLAM::PointCloud* EllipsoidExtractor::ApplyPlaneFilter(EllipsoidSLAM::PointCloud* pCloud, double z)
+ORB_SLAM2::PointCloud* EllipsoidExtractor::ApplyPlaneFilter(ORB_SLAM2::PointCloud* pCloud, double z)
 {
-    EllipsoidSLAM::PointCloud *pCloudFiltered = new EllipsoidSLAM::PointCloud;
+    ORB_SLAM2::PointCloud *pCloudFiltered = new ORB_SLAM2::PointCloud;
     int num = pCloud->size();
     for(auto p: (*pCloud))
     {
@@ -636,9 +636,9 @@ EllipsoidSLAM::PointCloud* EllipsoidExtractor::ApplyPlaneFilter(EllipsoidSLAM::P
     return pCloudFiltered;
 }
 
-EllipsoidSLAM::PointCloud* EllipsoidExtractor::ApplySupportingPlaneFilter(EllipsoidSLAM::PointCloud* pCloud)
+ORB_SLAM2::PointCloud* EllipsoidExtractor::ApplySupportingPlaneFilter(ORB_SLAM2::PointCloud* pCloud)
 {
-    EllipsoidSLAM::PointCloud *pCloudFiltered = new EllipsoidSLAM::PointCloud;
+    ORB_SLAM2::PointCloud *pCloudFiltered = new ORB_SLAM2::PointCloud;
     int num = pCloud->size();
 
     double config_dis_thresh = Config::Get<double>("EllipsoidExtractor.SupportingPlaneFilter.DisThresh");
@@ -706,7 +706,7 @@ bool EllipsoidExtractor::GetCenter(cv::Mat& depth, Eigen::Vector4d& bbox, Eigen:
     Eigen::Vector4d centroid;
     pcl::compute3DCentroid(cloud, centroid);    // get their centroid
 
-    EllipsoidSLAM::PointXYZRGB p;
+    ORB_SLAM2::PointXYZRGB p;
     p.x = centroid[0];
     p.y = centroid[1];
     p.z = centroid[2];
@@ -730,7 +730,7 @@ bool EllipsoidExtractor::GetCenter(cv::Mat& depth, Eigen::Vector4d& bbox, Eigen:
 }
 
 
-EllipsoidSLAM::PointCloud* EllipsoidExtractor::ApplyEuclideanFilter(EllipsoidSLAM::PointCloud* pCloud, Vector3d &center)
+ORB_SLAM2::PointCloud* EllipsoidExtractor::ApplyEuclideanFilter(ORB_SLAM2::PointCloud* pCloud, Vector3d &center)
 {
     clock_t time_1_start = clock();
 
@@ -800,7 +800,7 @@ EllipsoidSLAM::PointCloud* EllipsoidExtractor::ApplyEuclideanFilter(EllipsoidSLA
         }
     }
 
-    EllipsoidSLAM::PointCloud* pCloudFiltered;
+    ORB_SLAM2::PointCloud* pCloudFiltered;
     if(!bFindCluster)
     {
         miEuclideanFilterState = 3;
@@ -809,7 +809,7 @@ EllipsoidSLAM::PointCloud* EllipsoidExtractor::ApplyEuclideanFilter(EllipsoidSLA
 
     clock_t time_4_selectTheBestCluster = clock();
 
-    pCloudFiltered = new EllipsoidSLAM::PointCloud(pclXYZToQuadricPointCloud(pFinalPoints)); 
+    pCloudFiltered = new ORB_SLAM2::PointCloud(pclXYZToQuadricPointCloud(pFinalPoints)); 
     miEuclideanFilterState = 0;
 
     clock_t time_5_copyNewCloud = clock();
@@ -884,13 +884,14 @@ void EllipsoidExtractor::OpenVisualization(Map* pMap)
 
 void EllipsoidExtractor::ClearPointCloudList()
 {
-    if( mbOpenVisualization )
-    {
-        mpMap->DeletePointCloudList("EllipsoidExtractor", 1);  // partial martching   
-    }
+    // [反向][整合]
+    // if( mbOpenVisualization )
+    // {
+    //     mpMap->DeletePointCloudList("EllipsoidExtractor", 1);  // partial martching   
+    // }
 }
 
-void EllipsoidExtractor::VisualizePointCloud(const string& name, EllipsoidSLAM::PointCloud* pCloud, const Vector3d &color, int point_size){
+void EllipsoidExtractor::VisualizePointCloud(const string& name, ORB_SLAM2::PointCloud* pCloud, const Vector3d &color, int point_size){
     if( mbOpenVisualization ) 
     {
         // if the color is not set, use random color
@@ -913,7 +914,8 @@ void EllipsoidExtractor::VisualizePointCloud(const string& name, EllipsoidSLAM::
 
         string full_name = string("EllipsoidExtractor.") + name;
 
-        mpMap->AddPointCloudList(full_name, pCloud, 1);
+        // [反向][整合]
+        //mpMap->AddPointCloudList(full_name, pCloud, 1);
     }
 
 }
@@ -922,7 +924,8 @@ void EllipsoidExtractor::VisualizeEllipsoid(const string& name, g2o::ellipsoid* 
 {
     if( mbOpenVisualization ) 
     {
-        mpMap->addEllipsoidVisual(pObj);
+        // [反向][整合]
+        //mpMap->addEllipsoidVisual(pObj);
     }    
 }
 
@@ -937,7 +940,7 @@ void EllipsoidExtractor::OpenSymmetry()
 
 }
 
-g2o::ellipsoid EllipsoidExtractor::GetEllipsoidFromNomalizedPointCloud(EllipsoidSLAM::PointCloud* pCloud)
+g2o::ellipsoid EllipsoidExtractor::GetEllipsoidFromNomalizedPointCloud(ORB_SLAM2::PointCloud* pCloud)
 {
     g2o::ellipsoid e_zero_normalized;
     PCAResult dataCenterPCA = ProcessPCANormalized(pCloud);     // find the max value along x,y,z axis

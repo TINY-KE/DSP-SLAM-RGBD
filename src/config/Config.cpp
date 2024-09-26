@@ -1,7 +1,7 @@
 
 #include "Config.h"
 
-namespace EllipsoidSLAM{
+namespace ORB_SLAM2{
     void Config::SetParameterFile( const std::string& filename )
     {
         if ( mConfig == nullptr )

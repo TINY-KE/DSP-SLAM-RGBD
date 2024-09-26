@@ -23,7 +23,7 @@
 using namespace g2o;
 using namespace Eigen;
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 
     Pri::Pri(double a_, double b_, double c_)
@@ -509,4 +509,4 @@ namespace EllipsoidSLAM
             return Pri(1,1);
     }
 
-} // namespace EllipsoidSLAM
+} // namespace ORB_SLAM2

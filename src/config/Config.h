@@ -10,7 +10,7 @@
 
 using namespace std;
 
-namespace EllipsoidSLAM {
+namespace ORB_SLAM2 {
     class Config{
     public:
         static void SetParameterFile( const string& filename );

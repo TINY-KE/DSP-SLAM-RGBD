@@ -20,6 +20,10 @@
 
 # include <mutex>
 # include <Eigen/Dense>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
+typedef pcl::PointXYZ PointType;
 
 namespace ORB_SLAM2
 {
@@ -56,6 +60,16 @@ public:
     bool isGood;
     std::mutex mMutexFeatures;
     std::mutex mMutexDetection;
+
+
+// [整合]
+// public:
+//     std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> valid_edges;
+//     Eigen::Vector4d bbox;
+//     int label;
+//     double prob;
+
+//     pcl::PointCloud<PointType>::Ptr pcd_ptr;
 };
 }
 

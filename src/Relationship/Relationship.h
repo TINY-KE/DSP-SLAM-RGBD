@@ -12,7 +12,7 @@
 
 #include <Eigen/Core>
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
     // 该类在局部坐标系下计算, 匹配局部物体与局部平面之间的潜在约束关系。
     // 提取结果保存为  obj_id -> plane_id 的映射. 以及结构体.
@@ -47,6 +47,6 @@ namespace EllipsoidSLAM
 
     };
 
-} // namespace EllipsoidSLAM
+} // namespace ORB_SLAM2
 
 #endif

@@ -12,7 +12,7 @@
 
 using namespace Eigen;
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
     class Pri
     {
@@ -86,6 +86,6 @@ namespace EllipsoidSLAM
         const std::string PREFIX_E = "PARAM_SEMANTICPRIOR_E_";
     };
 
-} // namespace EllipsoidSLAM
+} // namespace ORB_SLAM2
 
 #endif

@@ -1,6 +1,6 @@
 #include "PointCloudFilter.h"
 
-Vector2d getXYCenterOfPointCloud(EllipsoidSLAM::PointCloud* pPoints)
+Vector2d getXYCenterOfPointCloud(ORB_SLAM2::PointCloud* pPoints)
 {
     double x=0;
     double y=0;
@@ -18,9 +18,9 @@ Vector2d getXYCenterOfPointCloud(EllipsoidSLAM::PointCloud* pPoints)
 
 
 // coordinates : x -> right, y-> down, z->front 
-EllipsoidSLAM::PointCloud getPointCloudInRect(cv::Mat &depth, cv::Mat &rgb, const VectorXd &detect, EllipsoidSLAM::camera_intrinsic &camera, double range) {
+ORB_SLAM2::PointCloud getPointCloudInRect(cv::Mat &depth, cv::Mat &rgb, const VectorXd &detect, ORB_SLAM2::camera_intrinsic &camera, double range) {
     // detect : x1 y1 x2 y2 
-    EllipsoidSLAM::PointCloud cloud;
+    ORB_SLAM2::PointCloud cloud;
 
     // scan the points in the bounding box 
     int x1 = int(detect(0));
@@ -33,7 +33,7 @@ EllipsoidSLAM::PointCloud getPointCloudInRect(cv::Mat &depth, cv::Mat &rgb, cons
             ushort *ptd = depth.ptr<ushort>(y);
             ushort d = ptd[x];
 
-            EllipsoidSLAM::PointXYZRGB p;
+            ORB_SLAM2::PointXYZRGB p;
             p.z = d / camera.scale;
             if (p.z <= 0.1 || p.z > range)    // if the depth is valid
                 continue;
@@ -55,15 +55,15 @@ EllipsoidSLAM::PointCloud getPointCloudInRect(cv::Mat &depth, cv::Mat &rgb, cons
 
 }
 
-EllipsoidSLAM::PointCloud getPointCloudInRect(cv::Mat &depth, const VectorXd &detect, EllipsoidSLAM::camera_intrinsic &camera, double range) {
+ORB_SLAM2::PointCloud getPointCloudInRect(cv::Mat &depth, const VectorXd &detect, ORB_SLAM2::camera_intrinsic &camera, double range) {
     cv::Mat rgb = cv::Mat(depth.rows, depth.cols, CV_8UC3, cv::Scalar(0,0,0));    
     return getPointCloudInRect(depth, rgb, detect, camera, range);
 }
 
-void filterGround(EllipsoidSLAM::PointCloud** ppCloud)
+void filterGround(ORB_SLAM2::PointCloud** ppCloud)
 {
-    EllipsoidSLAM::PointCloud *pCloudFiltered = new EllipsoidSLAM::PointCloud;
-    EllipsoidSLAM::PointCloud *pCloud = *ppCloud;
+    ORB_SLAM2::PointCloud *pCloudFiltered = new ORB_SLAM2::PointCloud;
+    ORB_SLAM2::PointCloud *pCloud = *ppCloud;
     int num = pCloud->size();
     for(auto p: (*pCloud))
     {
@@ -75,7 +75,7 @@ void filterGround(EllipsoidSLAM::PointCloud** ppCloud)
     (*ppCloud) = pCloudFiltered;
 }
 
-void outputCloud(EllipsoidSLAM::PointCloud *pCloud, int num )
+void outputCloud(ORB_SLAM2::PointCloud *pCloud, int num )
 {
     int total_num = pCloud->size();
 
@@ -89,12 +89,12 @@ void outputCloud(EllipsoidSLAM::PointCloud *pCloud, int num )
     }
 }
 
-EllipsoidSLAM::PointCloud pclToQuadricPointCloud(PointCloudPCL& cloudPCL)
+ORB_SLAM2::PointCloud pclToQuadricPointCloud(PointCloudPCL& cloudPCL)
 {
-    EllipsoidSLAM::PointCloud cloud;
+    ORB_SLAM2::PointCloud cloud;
     int num = cloudPCL.points.size();
     for(int i=0;i<num;i++){
-        EllipsoidSLAM::PointXYZRGB p;
+        ORB_SLAM2::PointXYZRGB p;
         PointT pT = cloudPCL.points[i];
         p.r = pT.r;
         p.g = pT.g;
@@ -109,19 +109,19 @@ EllipsoidSLAM::PointCloud pclToQuadricPointCloud(PointCloudPCL& cloudPCL)
     return cloud;
 }
 
-EllipsoidSLAM::PointCloud pclToQuadricPointCloud(PointCloudPCL::Ptr &pCloud)
+ORB_SLAM2::PointCloud pclToQuadricPointCloud(PointCloudPCL::Ptr &pCloud)
 {
     PointCloudPCL& cloud = *pCloud;
     return pclToQuadricPointCloud(cloud);
 }
 
-EllipsoidSLAM::PointCloud* pclToQuadricPointCloudPtr(PointCloudPCL::Ptr &pCloud)
+ORB_SLAM2::PointCloud* pclToQuadricPointCloudPtr(PointCloudPCL::Ptr &pCloud)
 {
-    EllipsoidSLAM::PointCloud* cloudPtr = new EllipsoidSLAM::PointCloud;
-    EllipsoidSLAM::PointCloud& cloud = *cloudPtr;
+    ORB_SLAM2::PointCloud* cloudPtr = new ORB_SLAM2::PointCloud;
+    ORB_SLAM2::PointCloud& cloud = *cloudPtr;
     int num = pCloud->points.size();
     for(int i=0;i<num;i++){
-        EllipsoidSLAM::PointXYZRGB p;
+        ORB_SLAM2::PointXYZRGB p;
         PointT pT = pCloud->points[i];
         p.r = pT.r;
         p.g = pT.g;
@@ -136,13 +136,13 @@ EllipsoidSLAM::PointCloud* pclToQuadricPointCloudPtr(PointCloudPCL::Ptr &pCloud)
     return cloudPtr;
 }
 
-PointCloudPCL::Ptr QuadricPointCloudToPcl(EllipsoidSLAM::PointCloud &cloud)
+PointCloudPCL::Ptr QuadricPointCloudToPcl(ORB_SLAM2::PointCloud &cloud)
 {
     PointCloudPCL::Ptr pCloud(new PointCloudPCL);
     
     int num = cloud.size();
     for(int i=0;i<num;i++){
-        EllipsoidSLAM::PointXYZRGB pT = cloud[i];
+        ORB_SLAM2::PointXYZRGB pT = cloud[i];
         
         PointT p;
         p.r = pT.r;
@@ -158,13 +158,13 @@ PointCloudPCL::Ptr QuadricPointCloudToPcl(EllipsoidSLAM::PointCloud &cloud)
     return pCloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr QuadricPointCloudToPclXYZ(EllipsoidSLAM::PointCloud &cloud)
+pcl::PointCloud<pcl::PointXYZ>::Ptr QuadricPointCloudToPclXYZ(ORB_SLAM2::PointCloud &cloud)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr pCloud(new pcl::PointCloud<pcl::PointXYZ>);
     
     int num = cloud.size();
     for(int i=0;i<num;i++){
-        EllipsoidSLAM::PointXYZRGB pT = cloud[i];
+        ORB_SLAM2::PointXYZRGB pT = cloud[i];
         
         pcl::PointXYZ p;
         p.x = pT.x;
@@ -178,12 +178,12 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr QuadricPointCloudToPclXYZ(EllipsoidSLAM::Poi
     return pCloud;
 }
 
-EllipsoidSLAM::PointCloud pclXYZToQuadricPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &pCloud)
+ORB_SLAM2::PointCloud pclXYZToQuadricPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &pCloud)
 {
-    EllipsoidSLAM::PointCloud cloud;
+    ORB_SLAM2::PointCloud cloud;
     int num = pCloud->points.size();
     for(int i=0;i<num;i++){
-        EllipsoidSLAM::PointXYZRGB p;
+        ORB_SLAM2::PointXYZRGB p;
         pcl::PointXYZ pT = pCloud->points[i];
         p.x = pT.x;
         p.y = pT.y;
@@ -194,13 +194,13 @@ EllipsoidSLAM::PointCloud pclXYZToQuadricPointCloud(pcl::PointCloud<pcl::PointXY
     return cloud;
 }
 
-EllipsoidSLAM::PointCloud* pclXYZToQuadricPointCloudPtr(pcl::PointCloud<pcl::PointXYZ>::Ptr &pCloud)
+ORB_SLAM2::PointCloud* pclXYZToQuadricPointCloudPtr(pcl::PointCloud<pcl::PointXYZ>::Ptr &pCloud)
 {
-    EllipsoidSLAM::PointCloud* cloudPtr = new EllipsoidSLAM::PointCloud;
-    EllipsoidSLAM::PointCloud &cloud = *cloudPtr;
+    ORB_SLAM2::PointCloud* cloudPtr = new ORB_SLAM2::PointCloud;
+    ORB_SLAM2::PointCloud &cloud = *cloudPtr;
     int num = pCloud->points.size();
     for(int i=0;i<num;i++){
-        EllipsoidSLAM::PointXYZRGB p;
+        ORB_SLAM2::PointXYZRGB p;
         pcl::PointXYZ pT = pCloud->points[i];
         p.x = pT.x;
         p.y = pT.y;
@@ -213,7 +213,7 @@ EllipsoidSLAM::PointCloud* pclXYZToQuadricPointCloudPtr(pcl::PointCloud<pcl::Poi
 
 
 void 
-DownSamplePointCloud(EllipsoidSLAM::PointCloud& cloudIn, EllipsoidSLAM::PointCloud& cloudOut, int param_num)
+DownSamplePointCloud(ORB_SLAM2::PointCloud& cloudIn, ORB_SLAM2::PointCloud& cloudOut, int param_num)
 {
     clock_t startTime,endTime;
     startTime = clock();
@@ -252,7 +252,7 @@ DownSamplePointCloud(EllipsoidSLAM::PointCloud& cloudIn, EllipsoidSLAM::PointClo
     // cout << "Time diff outlier: " <<(double)(endTime_outlier - startTime_outlier) / CLOCKS_PER_SEC << "s" << endl;
 }
 
-void DownSamplePointCloudOnly(EllipsoidSLAM::PointCloud& cloudIn, EllipsoidSLAM::PointCloud& cloudOut, double grid)
+void DownSamplePointCloudOnly(ORB_SLAM2::PointCloud& cloudIn, ORB_SLAM2::PointCloud& cloudOut, double grid)
 {
     PointCloudPCL::Ptr pPclCloud = QuadricPointCloudToPcl(cloudIn);
 
@@ -266,7 +266,7 @@ void DownSamplePointCloudOnly(EllipsoidSLAM::PointCloud& cloudIn, EllipsoidSLAM:
     cloudOut = pclToQuadricPointCloud(tmp);
 }
 
-void FiltOutliers(EllipsoidSLAM::PointCloud& cloudIn, EllipsoidSLAM::PointCloud& cloudOut, int num_neighbor)
+void FiltOutliers(ORB_SLAM2::PointCloud& cloudIn, ORB_SLAM2::PointCloud& cloudOut, int num_neighbor)
 {
     PointCloudPCL::Ptr pPclCloud = QuadricPointCloudToPcl(cloudIn);
 
@@ -281,7 +281,7 @@ void FiltOutliers(EllipsoidSLAM::PointCloud& cloudIn, EllipsoidSLAM::PointCloud&
     cloudOut = pclToQuadricPointCloud(pPclCloudFiltered);
 }
 
-void FiltPointsInBox(EllipsoidSLAM::PointCloud* pPoints_global, EllipsoidSLAM::PointCloud* pPoints_global_inBox, g2o::ellipsoid &e){
+void FiltPointsInBox(ORB_SLAM2::PointCloud* pPoints_global, ORB_SLAM2::PointCloud* pPoints_global_inBox, g2o::ellipsoid &e){
     double radius = MAX(MAX(e.scale[0], e.scale[1]), e.scale[2]);
     Vector3d center = e.toVector().head(3);
     
@@ -306,7 +306,7 @@ void FiltPointsInBox(EllipsoidSLAM::PointCloud* pPoints_global, EllipsoidSLAM::P
 }
 
 // add the points in point cloud p2 to p1
-void CombinePointCloud(EllipsoidSLAM::PointCloud *p1, EllipsoidSLAM::PointCloud *p2){
+void CombinePointCloud(ORB_SLAM2::PointCloud *p1, ORB_SLAM2::PointCloud *p2){
     if( p1 ==NULL || p2==NULL){
         cerr<< " point cloud is NULL. " << endl;
         return;

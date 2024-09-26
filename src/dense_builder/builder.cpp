@@ -28,7 +28,7 @@ void Builder::processFrame(cv::Mat &rgb, cv::Mat &depth, Eigen::VectorXd &pose, 
     mpCurrentMap = pGlobalPointCloud;
 
     // add to map
-    bool bGlobalMap = EllipsoidSLAM::Config::Get<int>("Visualization.Builder.Global.Open") == 1;
+    bool bGlobalMap = ORB_SLAM2::Config::Get<int>("Visualization.Builder.Global.Open") == 1;
     if(bGlobalMap)
         addPointCloudToMap(pGlobalPointCloud);
 

@@ -24,8 +24,8 @@ MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3 -march=native ")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -march=native")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3  ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ")
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
@@ -56,8 +56,12 @@ include_directories(
         ${GLUT_INCLUDE_DIRS}
 
         ${OpenCV_INCLUDE_DIRS}
+        /home/robotlab/anaconda3/envs/dsp-slam/include/python3.7m
 )
 
+
+# You need to set to your own Python paths
+add_subdirectory(pybind11)
 
 
 # 生成elliposid的库
@@ -72,25 +76,26 @@ ${OpenCV_LIBS}
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 add_library(ELLIPOSID_LIB SHARED
         src/core/Ellipsoid.cpp
-        src/core/Map.cpp
-        src/core/MapDrawer.cpp
-        src/core/Viewer.cpp
-        src/core/Initializer.cpp
+        # src/core/Map.cpp
+        # src/core/MapDrawer.cpp
+        # src/core/Viewer.cpp
+        # src/core/Ini/tializer.cpp
         src/core/Geometry.cpp
-        src/core/System.cpp
-        src/core/Tracking.cpp
-        src/core/FrameDrawer.cpp
-        src/core/Optimizer.cpp
-        src/core/Frame.cpp
+        # src/core/System.cpp
+        # src/core/Tracking.cpp
+        # src/core/FrameDrawer.cpp
+        # src/core/Optimizer.cpp
+        # src/core/Frame.cpp
         src/core/Plane.cpp
-        src/core/DataAssociation.cpp
+        # src/core/DataAssociation.cpp
         src/core/BasicEllipsoidEdges.cpp
         src/core/NonparamDA.cpp
         src/core/SupportingPlane.cpp
         src/core/ConstrainPlane.cpp
-        src/core/SemanticLabel.cpp
+        # src/core/SemanticLabel.cpp
         src/core/PriorInfer.cpp
         )
+
 target_link_libraries(ELLIPOSID_LIB
         ${OpenCV_LIBS}
         ${EIGEN3_LIBS}
@@ -120,8 +125,6 @@ add_subdirectory(src/Relationship)
 
 
 
-# You need to set to your own Python paths
-add_subdirectory(pybind11)
 
 
 
@@ -168,11 +171,12 @@ target_link_libraries(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
         ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
         ${PCL_LIBRARY_DIRS}
+        # ELLIPOSID_LIB
         )
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
-add_executable(dsp_slam dsp_slam.cc)
-target_link_libraries(dsp_slam ${PROJECT_NAME} /usr/lib/x86_64-linux-gnu/libtiff.so.5)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+# add_executable(dsp_slam dsp_slam.cc)
+# target_link_libraries(dsp_slam ${PROJECT_NAME} /usr/lib/x86_64-linux-gnu/libtiff.so.5)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_executable(dsp_slam_mono dsp_slam_mono.cc)

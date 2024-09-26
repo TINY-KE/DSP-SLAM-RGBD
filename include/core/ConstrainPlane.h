@@ -34,5 +34,5 @@ namespace g2o
 
     };
 
-} // namespace EllipsoidSLAM
+} // namespace ORB_SLAM2
 #endif

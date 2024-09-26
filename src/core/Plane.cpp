@@ -177,34 +177,34 @@ namespace g2o
         return p2.param;
     }
 
-    Vector3d plane::GetLineFromCenterAngle(const Vector2d center, double angle)
-    {
-        // x = center[0] + t * cos(theta)
-        // y = center[1] + t * sin(theta)
-        // goal : 
-        // AX + BY + C = 0 ;  get A,B,C
+    // Vector3d plane::GetLineFromCenterAngle(const Vector2d center, double angle)
+    // {
+    //     // x = center[0] + t * cos(theta)
+    //     // y = center[1] + t * sin(theta)
+    //     // goal : 
+    //     // AX + BY + C = 0 ;  get A,B,C
 
-        // get rid of t:
-        // sin(theta) * x - cos(theta) * y = 
-        //                      sin(theta) * center[0] - cos(theta) * center[1]
+    //     // get rid of t:
+    //     // sin(theta) * x - cos(theta) * y = 
+    //     //                      sin(theta) * center[0] - cos(theta) * center[1]
         
-        // so: 
-        // sint * x + (- cost) * y  + (cost*c1 - sint*c0) = 0
+    //     // so: 
+    //     // sint * x + (- cost) * y  + (cost*c1 - sint*c0) = 0
 
-        Vector3d param;
-        param[0] = sin(angle);
-        param[1] = -cos(angle);
-        param[2] = cos(angle) * center[1] - sin(angle) * center[0];
+    //     Vector3d param;
+    //     param[0] = sin(angle);
+    //     param[1] = -cos(angle);
+    //     param[2] = cos(angle) * center[1] - sin(angle) * center[0];
 
-        return param;
-    }
+    //     return param;
+    // }
 
-    Vector4d plane::LineToPlane(const Vector3d line)
-    {
-        Vector4d plane;
-        plane << line[0], line[1], 0, line[2];
-        return plane;
-    }
+    // Vector4d plane::LineToPlane(const Vector3d line)
+    // {
+    //     Vector4d plane;
+    //     plane << line[0], line[1], 0, line[2];
+    //     return plane;
+    // }
 
     double plane::angleToPlane(const g2o::plane& pl)
     {

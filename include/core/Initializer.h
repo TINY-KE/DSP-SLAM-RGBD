@@ -9,7 +9,7 @@
 using namespace Eigen;
 using namespace g2o;
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
     class Initializer
     {
@@ -44,7 +44,7 @@ namespace EllipsoidSLAM
         Matrix3Xd generateProjectionMatrix(const SE3Quat& campose_cw, const Matrix3d& Kalib) const;
         MatrixXd fromDetectionsToLines(VectorXd &detection_mat);
 
-        void getDetectionAndPoseMatFromObservations(EllipsoidSLAM::Observations &obs,
+        void getDetectionAndPoseMatFromObservations(ORB_SLAM2::Observations &obs,
                                                     MatrixXd &pose_mat, MatrixXd &detection_mat);
 
         // sort eigen values in ascending order.

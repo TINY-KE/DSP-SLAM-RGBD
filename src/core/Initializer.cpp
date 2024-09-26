@@ -8,7 +8,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
     Initializer::Initializer(int rows, int cols) {
         miImageRows = rows;
@@ -346,7 +346,7 @@ namespace EllipsoidSLAM
         return mbResult;
     }
 
-    g2o::ellipsoid Initializer::initializeQuadric(EllipsoidSLAM::Observations &obs, Matrix3d &calib) {
+    g2o::ellipsoid Initializer::initializeQuadric(ORB_SLAM2::Observations &obs, Matrix3d &calib) {
         MatrixXd pose_mat;
         MatrixXd detection_mat;
 
@@ -365,7 +365,7 @@ namespace EllipsoidSLAM
         return e;
     }
 
-    void Initializer::getDetectionAndPoseMatFromObservations(EllipsoidSLAM::Observations &obs, MatrixXd &pose_mat,
+    void Initializer::getDetectionAndPoseMatFromObservations(ORB_SLAM2::Observations &obs, MatrixXd &pose_mat,
                                                              MatrixXd &detection_mat) {
         int frameSize = obs.size();
         pose_mat.resize(frameSize, 7);  // x y z qx qy qz qw

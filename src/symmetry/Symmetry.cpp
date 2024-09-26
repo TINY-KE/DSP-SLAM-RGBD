@@ -4,7 +4,7 @@
 
 #include <ctime>
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
     // ---- compare functions
     bool comp_func_mapPlane(const pair<double,g2o::plane*>& t1, const pair<double,g2o::plane*>& t2)
@@ -160,7 +160,7 @@ namespace EllipsoidSLAM
         return depthProj;
     }
 
-    void Symmetry::SetBorders(EllipsoidSLAM::PointCloud* pBorders)
+    void Symmetry::SetBorders(ORB_SLAM2::PointCloud* pBorders)
     {
         mbOpenSparseEstimation = true;
         mpBorders = pBorders;

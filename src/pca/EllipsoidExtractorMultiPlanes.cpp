@@ -10,7 +10,7 @@
 
 #include "include/core/PriorInfer.h"
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 void VisualizeConstrainPlanes(g2o::ellipsoid& e_local, g2o::SE3Quat& Twc, Map* pMap)
 {
@@ -41,7 +41,9 @@ void VisualizeConstrainPlanes(g2o::ellipsoid& e_local, g2o::SE3Quat& Twc, Map* p
         g2o::plane *pPlane = new g2o::plane(planeVec, color);
         pPlane->transform(Twc);
         pPlane->InitFinitePlane(center, plane_size);
-        pMap->addPlane(pPlane);
+        
+        // [反向][整合]
+        // pMap->addPlane(pPlane);
     }
 
     return;
@@ -776,7 +778,7 @@ g2o::ellipsoid EllipsoidExtractor::EstimateLocalEllipsoidUsingMultiPlanes(cv::Ma
     pcl::transformPointCloud (*pCloudPCL, *pCloudPCLGravity, transform_gw);
 
     // 可视化: 重力系下的物体
-    // EllipsoidSLAM::PointCloud* pObjectCloudGravity = pclXYZToQuadricPointCloudPtr(pCloudPCLGravity); // normalized coordinate
+    // ORB_SLAM2::PointCloud* pObjectCloudGravity = pclXYZToQuadricPointCloudPtr(pCloudPCLGravity); // normalized coordinate
     // // mpMap->AddPointCloudList("cloud_gravity", pObjectCloudGravity, 0);
     // delete pObjectCloudGravity; pObjectCloudGravity = NULL;
 
@@ -790,7 +792,7 @@ g2o::ellipsoid EllipsoidExtractor::EstimateLocalEllipsoidUsingMultiPlanes(cv::Ma
     Eigen::Matrix4d transform_ng = Tgn.inverse().to_homogeneous_matrix();
     pcl::PointCloud<PointType>::Ptr pCloudPCLNormalized(new pcl::PointCloud<PointType>);
     pcl::transformPointCloud (*pCloudPCLGravity, *pCloudPCLNormalized, transform_ng);
-    EllipsoidSLAM::PointCloud* pObjectCloudNormalized = pclXYZToQuadricPointCloudPtr(pCloudPCLNormalized); // normalized coordinate
+    ORB_SLAM2::PointCloud* pObjectCloudNormalized = pclXYZToQuadricPointCloudPtr(pCloudPCLNormalized); // normalized coordinate
 
     // 可视化: 物体重力坐标系下，转角对齐后的点云
     // mpMap->AddPointCloudList("cloud_normalized", pObjectCloudNormalized, 0);
@@ -906,7 +908,7 @@ Vector3d Get3DPointFromDepth(int x, int y, const cv::Mat& depth_, const camera_i
     cv::Mat depth = depth_;
     ushort *ptd = depth.ptr<ushort>(y);
     ushort d = ptd[x];
-    EllipsoidSLAM::PointXYZRGB p;
+    ORB_SLAM2::PointXYZRGB p;
     p.z = d / camera.scale;
 
     bool bCenterValid = true;
@@ -1007,9 +1009,9 @@ void EllipsoidExtractor::SetManhattanPlanes(const std::vector<g2o::plane*> vpPla
 
 }
 
-EllipsoidSLAM::PointCloud* EllipsoidExtractor::ApplyMHPlanesFilter(EllipsoidSLAM::PointCloud* pCloud, std::vector<g2o::plane*>& vpPlanes)
+ORB_SLAM2::PointCloud* EllipsoidExtractor::ApplyMHPlanesFilter(ORB_SLAM2::PointCloud* pCloud, std::vector<g2o::plane*>& vpPlanes)
 {
-    EllipsoidSLAM::PointCloud *pCloudFiltered = new EllipsoidSLAM::PointCloud;
+    ORB_SLAM2::PointCloud *pCloudFiltered = new ORB_SLAM2::PointCloud;
     int num = pCloud->size();
 
     int i=0;
@@ -1058,7 +1060,7 @@ g2o::ellipsoid EllipsoidExtractor::EstimateLocalEllipsoidWithSupportingPlane(cv:
 }
 
 // // 使用统计方法，更鲁棒地估计其外围立方体
-// PCAResult EllipsoidExtractor::ProcessPCANormalizedWithStatics(EllipsoidSLAM::PointCloud* pObject)
+// PCAResult EllipsoidExtractor::ProcessPCANormalizedWithStatics(ORB_SLAM2::PointCloud* pObject)
 // {
 //     // -------- 参数设置 ---------
 //     int config_resolution = 400;   // 格子数量;  一般家具物体 3m长, 则可到 0.0075 cm.

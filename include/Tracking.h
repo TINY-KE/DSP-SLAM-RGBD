@@ -229,6 +229,11 @@ protected:
     bool mbRGB;
 
     list<MapPoint*> mlpTemporalPoints;
+
+// [整合]
+public:
+    // void InferObjectsWithSemanticPrior(EllipsoidSLAM::Frame* pFrame, bool use_input_pri, bool replace_detection);
+
 };
 
 } //namespace ORB_SLAM

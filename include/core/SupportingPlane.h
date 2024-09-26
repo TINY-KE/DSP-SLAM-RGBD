@@ -5,7 +5,7 @@
 #include <vector>
 #include <set>
 
-namespace EllipsoidSLAM
+namespace ORB_SLAM2
 {
 
 class SupportingPlane
