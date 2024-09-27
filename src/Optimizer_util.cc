@@ -770,4 +770,13 @@ void Optimizer::LocalJointBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map 
 
 }
 
+
+
+
+void Optimizer::SetGroundPlane(Eigen::Matrix<double, 4, 1>& normal){
+    mbGroundPlaneSet = true;
+    mGroundPlaneNormal = normal;
+}
+
+
 }

@@ -36,15 +36,14 @@ namespace ORB_SLAM2 {
             return;
         }
 
-        // // ********* 测试1： 所有先验都是 1:1:1 *********
-        // // // 读取 pri;  调试模式从全局 Config 中读取
-        // // double d = Config::ReadValue<double>("SemanticPrior.PriorD");
-        // // double e = Config::ReadValue<double>("SemanticPrior.PriorE");
-        // double weight = Config::ReadValue<double>("SemanticPrior.Weight");
-        // // Pri pri(d,e);
+        // Pri pri = Pri(1,1);
+        // pri.print();
 
-        // // std::cout << "Begin infering ... " << std::endl;
-        // // pri.print();
+        // ********* 测试1： 所有先验都是 1:1:1 *********
+        // // 读取 pri;  调试模式从全局 Config 中读取
+        double weight = Config::ReadValue<double>("SemanticPrior.Weight");
+        std::cout << "weight:"<<weight << std::endl;
+        std::cout << "Begin infering ... " << std::endl;
 
         // // 对于帧内每个物体，做推断，并可视化新的物体
         // auto& meas = pFrame->meas;
@@ -60,28 +59,14 @@ namespace ORB_SLAM2 {
         //     Vector4d bbox = m.ob_2d.bbox;
 
         //     // Check : 确保该物体类型是在地面之上的
-        //     if(!CheckLabelOnGround(m.ob_2d.label)) continue;
+        //     // if(!CheckLabelOnGround(m.ob_2d.label)) continue;
 
         //     // Check : 该 bbox 不在边缘
-        //     bool is_border = calibrateMeasurement(bbox, mRows, mCols, Config::Get<int>("Measurement.Border.Pixels"), Config::Get<int>("Measurement.LengthLimit.Pixels"));
-        //     if(is_border) continue;
+        //     // bool is_border = calibrateMeasurement(bbox, mRows, mCols, Config::Get<int>("Measurement.Border.Pixels"), Config::Get<int>("Measurement.LengthLimit.Pixels"));
+        //     // if(is_border) continue;
 
         //     // 生成Pri
-
-        //     // 设置Pri是否是读取或是默认
-        //     Pri pri;
-        //     if(use_input_pri)
-        //         pri = mPrifac.CreatePri(m.ob_2d.label);
-        //     else
-        //         pri = Pri(1,1);
-            
-        //     // bool result_pri = GeneratePriFromLabel(m.ob_2d.label, pri);
-        //     // // 如果不成功，我们按 1:1:1 计算?
-        //     // if(!result_pri)
-        //     // {
-        //     //     std::cout << "No pri found for : " << m.ob_2d.label << std::endl;
-        //     //     pri = Pri(1,1);
-        //     // }
+        //     Pri pri = Pri(1,1);
 
         //     std::cout << "Pri for label : " << m.ob_2d.label << std::endl;
         //     pri.print();
@@ -90,6 +75,7 @@ namespace ORB_SLAM2 {
         //     g2o::plane ground_pl_local = mGroundPlane; ground_pl_local.transform(pFrame->cam_pose_Tcw);
 
         //     priorInfer pi(mRows, mCols, mCalib);
+
         //     // *********************************
         //     // 生成一个新的 Initguess
         //     // *********************************
@@ -98,27 +84,8 @@ namespace ORB_SLAM2 {
 
         //     bool bUsePriInit = false;   // 未开发完成的功能
         //     g2o::ellipsoid e_infer_mono_guess;
-        //     if(bUsePriInit){
-        //         e_infer_mono_guess = pi.MonocularInferExpand(e_init_guess, pri, weight, ground_pl_local);
-
-        //         // DEBUG 可视化 挨个显示所有的椭球体
-        //         // auto vEsForVisual = pi.GetAllPossibleEllipsoids();
-        //         // for(int i=0;i<vEsForVisual.size();i++)
-        //         // {
-        //         //     g2o::ellipsoid* pETemp = new g2o::ellipsoid(vEsForVisual[i].transform_from(pFrame->cam_pose_Twc));
-        //         //     // mpMap->ClearEllipsoidsVisual();
-        //         //     pETemp->setColor(Vector3d(1.0,0,0));
-        //         //     mpMap->addEllipsoidVisual(pETemp);
-        //         //     std::cout << "Visualize " << i << std::endl;
-        //         //     std::cout << "Wait for push ... " << std::endl;
-
-        //         //     bool bDebug = false;
-        //         //     if(bDebug)
-        //         //         getchar();
-        //         // }
-        //     }
-        //     else 
-        //         e_infer_mono_guess = pi.MonocularInfer(e_init_guess, pri, weight, ground_pl_local);
+            
+        //     e_infer_mono_guess = pi.MonocularInfer(e_init_guess, pri, weight, ground_pl_local);
         //     // 设置椭球体label, prob
         //     e_infer_mono_guess.miLabel = m.ob_2d.label;
         //     e_infer_mono_guess.prob = m.ob_2d.rate; // 暂时设置为 bbox 检测的概率吧
@@ -129,7 +96,7 @@ namespace ORB_SLAM2 {
         //     Vector3d color_rgb(144,238,144); color_rgb/=255.0;
         //     if(!use_input_pri) color_rgb = Vector3d(1,0,0); // 默认版本为红色
         //     pEInfer_mono_guess->setColor(color_rgb);
-        //     mpMap->addEllipsoidObservation(pEInfer_mono_guess); // 可视化
+        //     // mpMap->addEllipsoidObservation(pEInfer_mono_guess); // 可视化
         //     std::cout << " Before Monocular Infer: " << e_init_guess.toMinimalVector().transpose() << std::endl;
         //     std::cout << " After Monocular Infer: " << e_infer_mono_guess.toMinimalVector().transpose() << std::endl;
 
@@ -149,12 +116,12 @@ namespace ORB_SLAM2 {
         //     // std::cout << "GroundPlaneNorma in Camera: " << std::endl << ground_pl_local.normal().head(3).normalized() << std::endl;
 
         //     // 可视化bbox的约束平面
-        //     VisualizeConstrainPlanes(e_infer_mono_guess, pFrame->cam_pose_Twc, mpMap); // 中点定在全局坐标系
+        //     // VisualizeConstrainPlanes(e_infer_mono_guess, pFrame->cam_pose_Twc, mpMap); // 中点定在全局坐标系
 
         // }       
 
         // std::cout << "Finish infering for " << meas_num << " objects..." << std::endl;
-        // return;
+        return;
     }
 
 
@@ -350,15 +317,14 @@ namespace ORB_SLAM2 {
     void Tracking::ActivateGroundPlane(g2o::plane &groundplane)
     {
         // Set groundplane to EllipsoidExtractor
-        
         // if( mbDepthEllipsoidOpened ){
         //     std::cout << " * Add supporting plane to Ellipsoid Extractor." << std::endl;
         //     mpEllipsoidExtractor->SetSupportingPlane(&groundplane, false);
         // }
 
-        // // Set groundplane to Optimizer
-        // std::cout << " * Add supporting plane to optimizer. " << std::endl;
-        // mpOptimizer->SetGroundPlane(groundplane.param);
+        // Set groundplane to Optimizer
+        std::cout << " * Add supporting plane to optimizer. " << std::endl;
+        mpOptimizer->SetGroundPlane(groundplane.param);
 
         // std::cout << " * Add supporting plane to Manhattan Plane Extractor. " << std::endl;
         // pPlaneExtractorManhattan->SetGroundPlane(&groundplane);

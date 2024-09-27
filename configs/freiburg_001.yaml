@@ -122,3 +122,12 @@ Tworld_camera.qz:  0.430
 # Tworld_camera.qx: -0.500
 # Tworld_camera.qy: -0.500
 # Tworld_camera.qz:  0.500
+
+
+
+MonocularInfer.Init.Dis: 5
+# Prior weight
+SemanticPrior.Weight: 1
+# Ground Plane Contrain weight
+SemanticPrior.GroundWeight: 2
+

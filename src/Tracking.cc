@@ -154,6 +154,9 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
         maskErrosion = fSettings["Objects.maskErrosion"];
     }
     DetectorConfigFile = fSettings["DetectorConfigPath"].string();
+
+    // [整合]
+    mpOptimizer = new Optimizer;
 }
 
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)

@@ -1,6 +1,6 @@
 [DSP与Elliposid整合]
 
-# 重新整合
+# 重新整合1 commit 7410783f71520b225b8dda8d4c56d78e4425e8b5
   + 在/home/robotlab/work/DSP-SLAM/include/ObjectDetection.h中加入变量,包括bbox
   + ....
   + 在Frame.h中的Frame Class加入EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -12,9 +12,21 @@
   + 在Tracking.h中  #include "core/Plane.h"
   + 生成预平面 Vector4d(0,0,1,0) ,并加入Map中
   + 可视化平面,  编写MapDrawer_ellipsoid.cc
+
+# 重新整合2  
   + 
-  
-  + 待: 将平面加入optimizer, 很危险,可能涉及g2o和eigen的报错
+  + 在tracking中, 加入 #include "Optimizer.h"和class Optimizer, 同时去除OptimizeEssentialGraph行参中的LocalMapping前缀
+  + 将平面加入optimizer, 很危险,可能涉及g2o和eigen的报错
+  + 在optimizer()加入结构函数,并在tracking.cc中mpOptimizer = new Optimizer;
+  + 在三方库中,加入EllipsoidExtractor.  并在Tracking::InferObjectsWithSemanticPrior()中 生成 Pri和PriorInfer
+  + 
+
+
+  + 待: void LocalMapping::SetOptimizer(Optimizer* optimizer)
+    {
+        mpOptimizer = optimizer;
+    }
+  + 
 
 
 
@@ -23,6 +35,7 @@
   
 # 之后,将SetObservations合并到GetObjectDetectionsMono
 
+# Eigen::Vector4d  能不能 全改为  Eigen::Matrix<double, 4, 1>,同理Vector3d
 
 
 

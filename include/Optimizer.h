@@ -102,8 +102,8 @@ public:
 
     // if bFixScale is true, 6DoF optimization (stereo,rgbd), 7DoF otherwise (mono)
     void static OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* pCurKF,
-                                       const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
-                                       const LoopClosing::KeyFrameAndPose &CorrectedSim3,
+                                       const KeyFrameAndPose &NonCorrectedSim3,
+                                       const KeyFrameAndPose &CorrectedSim3,
                                        const map<KeyFrame *, set<KeyFrame *> > &LoopConnections,
                                        const bool &bFixScale);
 
@@ -113,8 +113,9 @@ public:
     static int nBAdone;
 
     // [整合]
-//     void SetGroundPlane(Vector4d& normal);
-
+    void SetGroundPlane(Eigen::Matrix<double, 4, 1>& normal);
+    bool mbGroundPlaneSet;
+    Vector4d mGroundPlaneNormal;
 //     void GetOptimizedResult(EllipObjects& objs, Measurements& mms);
 
 
@@ -135,10 +136,9 @@ public:
 // private:
 //     std::map<int, std::vector<float>> mMapObjectConstrain;
 
-//     bool mbGroundPlaneSet;
-//     Vector4d mGroundPlaneNormal;
 
-//     bool mbRelationLoaded;
+
+    bool mbRelationLoaded;
 //     Relations mRelations;
 //     SupportingPlanes mSupportingPlanes;
 

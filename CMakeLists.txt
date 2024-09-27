@@ -168,7 +168,13 @@ add_library(${PROJECT_NAME} SHARED
         # [整合]
         src/core/Plane.cpp
 
+        # src/core/PriorInfer.cpp
+        # src/core/Ellipsoid.cpp
+        # src/core/BasicEllipsoidEdges.cpp
+        # src/core/Geometry.cpp
+        # src/core/ConstrainPlane.cpp
         )
+
 target_link_libraries(${PROJECT_NAME}
         pybind11::embed
         ${OpenCV_LIBS}
@@ -180,6 +186,8 @@ target_link_libraries(${PROJECT_NAME}
         # ELLIPOSID_LIB
         Config
         # PlaneExtractor
+        # EllipsoidExtractor
+        # Polygon
         )
 
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})

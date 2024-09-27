@@ -45,7 +45,8 @@
 
 // [整合]
 #include "core/Plane.h"
-
+#include "Optimizer.h"
+// #include "include/core/PriorInfer.h"
 
 namespace ORB_SLAM2
 {
@@ -57,6 +58,7 @@ class LocalMapping;
 class LoopClosing;
 class System;
 class MapObject;
+class Optimizer;
 
 class Tracking
 {  
@@ -260,11 +262,13 @@ public:
     // 设置相机的真实位姿,但只用于第一帧
     void SetRealPose(ORB_SLAM2::Frame* pFrame);
 
+    // 只要导入PlaneExtractor这个库, 就会报错
     // #include <src/plane/PlaneExtractor.h>
     // #include <src/plane/PlaneExtractorManhattan.h>
     // PlaneExtractor* pPlaneExtractor;
     // PlaneExtractorManhattan* pPlaneExtractorManhattan;
 
+    Optimizer* mpOptimizer;
 };
 
 } //namespace ORB_SLAM
