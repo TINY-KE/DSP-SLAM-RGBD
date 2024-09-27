@@ -181,5 +181,5 @@ cmake \
   -DPYTHON_INCLUDE_DIRS="$conda_env_dir/include/python3.7m" \
   -DPYTHON_EXECUTABLE="$conda_env_dir/bin/python3.7" \
   ..
-make -j12
+make -j14
 

@@ -39,7 +39,13 @@
 #include "System.h"
 #include "MapObject.h"
 
+#include <src/config/Config.h>
+
 #include <mutex>
+
+// [整合]
+#include "core/Plane.h"
+
 
 namespace ORB_SLAM2
 {
@@ -232,7 +238,32 @@ protected:
 
 // [整合]
 public:
-    // void InferObjectsWithSemanticPrior(EllipsoidSLAM::Frame* pFrame, bool use_input_pri, bool replace_detection);
+    std::string mStrSettingPath; 
+    
+    void UpdateObjectObservation_GenerateEllipsoid(ORB_SLAM2::Frame *pFrame, KeyFrame* pKF, bool withAssociation);
+    void GenerateObservationStructure(ORB_SLAM2::Frame* pFrame);
+    void InferObjectsWithSemanticPrior(ORB_SLAM2::Frame* pFrame, bool use_input_pri, bool replace_detection);
+
+    // 地面是否初始化
+    int miGroundPlaneState; // 0: Closed  1: estimating 2: estimated 3: set by mannual
+    g2o::plane mGroundPlane;  
+
+    // Mannual Set Groundplane
+    void SetGroundPlaneMannually(const Eigen::Vector4d &param);
+
+    //将平面添加到地图中,用于可视化； 并且将平面用于椭球体的生成
+    void ActivateGroundPlane(g2o::plane &groundplane);   
+
+    // 可视化平面
+    void VisualizeManhattanPlanes();
+
+    // 设置相机的真实位姿,但只用于第一帧
+    void SetRealPose(ORB_SLAM2::Frame* pFrame);
+
+    // #include <src/plane/PlaneExtractor.h>
+    // #include <src/plane/PlaneExtractorManhattan.h>
+    // PlaneExtractor* pPlaneExtractor;
+    // PlaneExtractorManhattan* pPlaneExtractorManhattan;
 
 };
 

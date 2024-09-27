@@ -65,6 +65,15 @@ private:
     cv::Mat mCameraPose;
 
     std::mutex mMutexCamera;
+
+// [整合]
+public:
+    void drawLine(const Vector3d& start, const Vector3d& end, const Vector3d& color, double width, double alpha = 1.0);
+
+    void drawPlaneWithEquation(plane* p);
+
+    bool drawPlanes(int visual_group=0);
+
 };
 
 } //namespace ORB_SLAM

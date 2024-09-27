@@ -18,7 +18,7 @@ IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
 ENDIF()
 
-SET(CMAKE_BUILD_TYPE Debug)
+# SET(CMAKE_BUILD_TYPE Debug)
 
 MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 
@@ -135,6 +135,7 @@ add_library(${PROJECT_NAME} SHARED
         src/System_util.cc
         src/Tracking.cc
         src/Tracking_util.cc
+        src/Tracking_ellipsoid.cc  #张嘉东 生成椭球体
         src/LocalMapping.cc
         src/LocalMapping_util.cc
         src/LoopClosing.cc
@@ -150,6 +151,7 @@ add_library(${PROJECT_NAME} SHARED
         src/Map.cc
         src/Map_util.cc
         src/MapDrawer.cc
+        src/MapDrawer_ellipsoid.cc
         src/Optimizer.cc
         src/Optimizer_util.cc
         src/PnPsolver.cc
@@ -162,6 +164,10 @@ add_library(${PROJECT_NAME} SHARED
         src/MapObject.cc
         src/ObjectDrawer.cc
         src/ObjectRenderer.cc
+
+        # [整合]
+        src/core/Plane.cpp
+
         )
 target_link_libraries(${PROJECT_NAME}
         pybind11::embed
@@ -172,6 +178,8 @@ target_link_libraries(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
         ${PCL_LIBRARY_DIRS}
         # ELLIPOSID_LIB
+        Config
+        # PlaneExtractor
         )
 
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})

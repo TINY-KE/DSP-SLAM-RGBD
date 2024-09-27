@@ -176,10 +176,10 @@ void Tracking::GetObjectDetectionsMono(KeyFrame *pKF)
         auto py_det = detections[detected_idx];
         det->background_rays = py_det.attr("background_rays").cast<Eigen::MatrixXf>();
         auto mask = py_det.attr("mask").cast<Eigen::MatrixXf>();
-        // det->bbox = py_det.attr("bbox").cast<Eigen::Vector4d>();
-        // std::cout << "[zhjd-debug] bbox:\n" << det->bbox << std::endl;
-        // det->label = py_det.attr("label").cast<int>();
-        // det->prob = py_det.attr("prob").cast<double>();
+        det->bbox = py_det.attr("bbox").cast<Eigen::Vector4d>();
+        std::cout << "[zhjd-debug] bbox:\n" << det->bbox << std::endl;
+        det->label = py_det.attr("label").cast<int>();
+        det->prob = py_det.attr("prob").cast<double>();
 
         cv::Mat mask_cv;
         cv::eigen2cv(mask, mask_cv);
@@ -294,6 +294,7 @@ void Tracking::AssociateObjectsByProjection(ORB_SLAM2::KeyFrame *pKF)
 
     }
 }
+
 
 
 }

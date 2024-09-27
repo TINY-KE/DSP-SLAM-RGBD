@@ -63,13 +63,13 @@ public:
 
 
 // [整合]
-// public:
-//     std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> valid_edges;
-//     Eigen::Vector4d bbox;
-//     int label;
-//     double prob;
+public:
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> valid_edges;
+    Eigen::Vector4d bbox;
+    int label;
+    double prob;
 
-//     pcl::PointCloud<PointType>::Ptr pcd_ptr;
+    pcl::PointCloud<PointType>::Ptr pcd_ptr;
 };
 }
 

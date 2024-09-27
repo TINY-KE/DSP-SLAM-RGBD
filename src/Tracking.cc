@@ -23,6 +23,7 @@
 
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
+#include<opencv2/core/eigen.hpp>
 
 #include"ORBmatcher.h"
 #include"FrameDrawer.h"
@@ -51,7 +52,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpMap(pMap), mnLastRelocFrameId(0)
 {
     // Load camera parameters from settings file
-
+    mStrSettingPath = strSettingPath;
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
     float fx = fSettings["Camera.fx"];
     float fy = fSettings["Camera.fy"];
@@ -236,6 +237,13 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
         imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
 
     mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
+    
+    // 初始帧的位姿
+    SetRealPose(&mCurrentFrame);
+
+    // 激活平面
+    ActivateGroundPlane(mGroundPlane);
+    // VisualizeManhattanPlanes();
 
     Track();
 
@@ -267,7 +275,15 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
     else
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 
+    // 初始帧的位姿
+    SetRealPose(&mCurrentFrame);
+
+    // todo: 目前是手动指定了平面, 之后可以改为自动检测
+    ActivateGroundPlane(mGroundPlane);
+    // VisualizeManhattanPlanes();
+
     Track();
+
 
     return mCurrentFrame.mTcw.clone();
 }
@@ -640,7 +656,7 @@ void Tracking::MonocularInitialization()
             Rcw.copyTo(Tcw.rowRange(0,3).colRange(0,3));
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
-
+            
             CreateInitialMapMonocular();
         }
     }
@@ -723,6 +739,42 @@ void Tracking::CreateInitialMapMonocular()
             pMP->SetWorldPos(pMP->GetWorldPos()*invMedianDepth);
         }
     }
+
+    // >>>>>>>>>>>>>>>>>>>>>>> [改进] 将相机和point转移到世界坐标系下
+    std::cout << "将相机和point转移到世界坐标系下" << std::endl;
+    cv::Mat Worldframe_to_Firstframe = mCurrentFrame.mGroundtruthPose_mat;
+    std::cout << "第一帧的真实位姿 :"<< Worldframe_to_Firstframe << std::endl;
+    if (Worldframe_to_Firstframe.empty())
+    {
+        std::cerr << "Error: Worldframe_to_Firstframe is empty!" << std::endl;
+        std::exit(EXIT_FAILURE);  // 或者：std::abort();
+    }
+    cv::Mat R = Worldframe_to_Firstframe.rowRange(0, 3).colRange(0, 3);
+    cv::Mat t = Worldframe_to_Firstframe.rowRange(0, 3).col(3);
+    cv::Mat Rinv = R.t();
+    cv::Mat Ow = -Rinv * t;
+    cv::Mat Firstframe_to_Worldframe = cv::Mat::eye(4, 4, CV_32F);
+    Rinv.copyTo(Firstframe_to_Worldframe.rowRange(0, 3).colRange(0, 3));
+    Ow.copyTo(Firstframe_to_Worldframe.rowRange(0, 3).col(3));
+
+    bool build_worldframe_on_ground = true;
+    if (build_worldframe_on_ground) // transform initial pose and map to ground frame
+    {
+        pKFini->SetPose(pKFini->GetPose() * Firstframe_to_Worldframe);
+        pKFcur->SetPose(pKFcur->GetPose() * Firstframe_to_Worldframe);
+
+        for (size_t iMP = 0; iMP < vpAllMapPoints.size(); iMP++)
+        {
+            if (vpAllMapPoints[iMP])
+            {
+                MapPoint *pMP = vpAllMapPoints[iMP];
+                pMP->SetWorldPos(Worldframe_to_Firstframe.rowRange(0, 3).colRange(0, 3) * pMP->GetWorldPos() + Worldframe_to_Firstframe.rowRange(0, 3).col(3));
+            }
+        }
+    }
+    std::cout << "[END] 将相机和point转移到世界坐标系下" << std::endl;
+
+    // <<<<<<<<<<<<<<<< 将相机和point转移到世界坐标系下
 
     mpLocalMapper->InsertKeyFrame(pKFini);
     mpLocalMapper->InsertKeyFrame(pKFcur);
@@ -1097,6 +1149,13 @@ void Tracking::CreateNewKeyFrame()
             AssociateObjectsByProjection(pKF);
         }
         
+        // [改进]进行椭球体生成
+        // 获取完检测之后更新物体观测
+        // 是否直接使用物体检测中的InstanceID
+        // bool withAssociation = true;
+        bool withAssociation = false;
+        // UpdateObjectObservation_GenerateEllipsoid( &mCurrentFrame, pKF, withAssociation);
+
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
         double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();

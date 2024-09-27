@@ -95,6 +95,8 @@ typedef std::vector<Measurement> Measurements;
 class Frame
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     Frame();
 
     // Copy constructor.
@@ -263,6 +265,8 @@ private:
 
 // [整合]
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     int static total_frame;
     int frame_seq_id;    // image topic sequence id, fixed
 
@@ -270,6 +274,7 @@ public:
     cv::Mat rgb_img;        // rgb img for visualization.
     cv::Mat gray_img;       // gray! for texture
     cv::Mat ellipsoids_2d_img;
+    cv::Mat mGroundtruthPose_mat;           // camera groundtruth.
 
     // double timestamp;
 
@@ -293,7 +298,7 @@ public:
     Measurements meas;
 
     // 
-    bool SetObservations(KeyFrame* pKF);
+    bool GetObservations_fromKeyFrame(KeyFrame* pKF);
 
 };
 

@@ -57,17 +57,17 @@ MapObject* Map::GetMapObject(int object_id)
 
 // [整合]
 
-// //Plane
-// void Map::addPlane(plane *pPlane, int visual_group) {
-//     unique_lock<mutex> lock(mMutexMap);
-//     pPlane->miVisualGroup = visual_group;
-//     mspPlanes.insert(pPlane);
-// }
+//Plane
+void Map::addPlane(plane *pPlane, int visual_group) {
+    unique_lock<mutex> lock(mMutexMap);
+    pPlane->miVisualGroup = visual_group;
+    mspPlanes.insert(pPlane);
+}
 
-// vector<plane *> Map::GetAllPlanes() {
-//     unique_lock<mutex> lock(mMutexMap);
-//     return vector<plane *>(mspPlanes.begin(), mspPlanes.end());
-// }
+vector<plane *> Map::GetAllPlanes() {
+    unique_lock<mutex> lock(mMutexMap);
+    return vector<plane *>(mspPlanes.begin(), mspPlanes.end());
+}
 
 // void Map::clearPlanes() {
 //     unique_lock<mutex> lock(mMutexMap);

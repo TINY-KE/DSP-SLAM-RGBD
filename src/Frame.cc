@@ -47,7 +47,8 @@ Frame::Frame(const Frame &frame)
      mpReferenceKF(frame.mpReferenceKF), mnScaleLevels(frame.mnScaleLevels),
      mfScaleFactor(frame.mfScaleFactor), mfLogScaleFactor(frame.mfLogScaleFactor),
      mvScaleFactors(frame.mvScaleFactors), mvInvScaleFactors(frame.mvInvScaleFactors),
-     mvLevelSigma2(frame.mvLevelSigma2), mvInvLevelSigma2(frame.mvInvLevelSigma2)
+     mvLevelSigma2(frame.mvLevelSigma2), mvInvLevelSigma2(frame.mvInvLevelSigma2),
+     mGroundtruthPose_mat(frame.mGroundtruthPose_mat.clone())
 {
     for(int i=0;i<FRAME_GRID_COLS;i++)
         for(int j=0; j<FRAME_GRID_ROWS; j++)
@@ -682,5 +683,30 @@ cv::Mat Frame::UnprojectStereo(const int &i)
     else
         return cv::Mat();
 }
+
+
+// [整合]
+bool Frame::GetObservations_fromKeyFrame(KeyFrame* pKF){
+    std::vector<ObjectDetection*> obj_dets = pKF->GetObjectDetections();
+    int num_det = obj_dets.size();
+    std::cout << "[张嘉东] num_det = " << num_det << std::endl;
+
+    mmObservations = Eigen::MatrixXd(num_det, 8);
+
+    for (int i = 0; i < num_det; i++) {
+        auto pDet = obj_dets[i];
+        Eigen::VectorXd mdet(8);
+        auto bbox = pDet->bbox;
+        auto label = pDet->label;
+        auto prob = pDet->prob;
+        int instanceID = 1;
+        mdet << i, bbox(0), bbox(1), bbox(2), bbox(3), label, prob, instanceID;
+        mmObservations.row(i) = mdet;
+    }   
+
+    return true;
+}
+
+
 
 } //namespace ORB_SLAM

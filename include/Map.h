@@ -133,7 +133,7 @@ protected:
 
 
 // [整合]
-// public:
+public:
 //     // 显示地图信息（如物体）
 //     void ShowMapInfo();
 
@@ -141,8 +141,8 @@ protected:
 //     void addEllipsoid(ellipsoid* pObj);
 //     std::vector<ellipsoid*> GetAllEllipsoids();
 
-//     void addPlane(plane* pPlane, int visual_group = 0);
-//     std::vector<plane*> GetAllPlanes();
+    void addPlane(plane* pPlane, int visual_group = 0);
+    std::vector<plane*> GetAllPlanes();
 //     void clearPlanes();
 
 
@@ -168,7 +168,7 @@ protected:
 // // [整合]
 // protected:
 //     std::vector<ellipsoid*> mspEllipsoids;
-//     std::set<plane*> mspPlanes;
+    std::set<plane*> mspPlanes;
 
 //     g2o::SE3Quat* mCameraState;   // Twc
 //     std::vector<g2o::SE3Quat*> mvCameraStates;      // Twc  camera in world

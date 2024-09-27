@@ -58,3 +58,67 @@ Viewer.ViewpointX: 0
 Viewer.ViewpointY: -10   # originally -10
 Viewer.ViewpointZ: -0.1
 Viewer.ViewpointF: 2000
+
+
+#--------------------------------------------------------------------------------------------
+# 整合
+#--------------------------------------------------------------------------------------------
+
+#核心控制选项
+PubGlobalGoal: 0  # 为1，用于实体机器人，需调用movebase；为0时，用于gazebo环境，手动键盘控制。
+PubLocalGoal: 1  # 1 my_nbv ; 2 cover;  0 frontier
+
+ObserveMaxNumBackgroudObject: 100
+MAM.Reward_angle_cost: 0.0  #计算reward时的dis。
+MAM.Reward_dis: 0.5  #计算reward时的dis。当前没用到
+Planle.Safe_radius: 0.5
+
+ConstraintType: 1 #3 rostf; 2 imu; 1 yaml
+FakeBackgroudObjects: 0  #fake背景物体的数量
+IE.BackgroudObjectNum: 5   #背景物体的先验数量
+IE.ThresholdEndMapping: 1.45   #0.4 #0.42   #设置为极小值，即可关闭end_build
+
+# 机器人相对于world的初始位置
+# 俯视30度
+# Tworld_camera.qw: -0.364187
+# Tworld_camera.qx: 0.606109
+# Tworld_camera.qy: 0.606109
+# Tworld_camera.qz: -0.364187
+#  俯视0度
+# Tworld_camera.qw: 0.430
+# Tworld_camera.qx: 0.561
+# Tworld_camera.qy: 0.561 
+# Tworld_camera.qz: 0.430
+#  俯视0度
+# Tworld_camera.qw: 0.478
+# Tworld_camera.qx: 0.521
+# Tworld_camera.qy: 0.521
+# Tworld_camera.qz: 0.478
+
+Tworld_camera.tx: 0.0
+Tworld_camera.ty: 0.0
+Tworld_camera.tz: 0.4  #this height is 0.2 higher than the height in gazebo
+
+
+
+# 
+# 俯视10度
+# Tworld_camera.qw: 0.454
+# Tworld_camera.qx: -0.541
+# Tworld_camera.qy: -0.541
+# Tworld_camera.qz: 0.454
+# 俯视20度
+# Tworld_camera.qw:  0.406
+# Tworld_camera.qx: -0.579
+# Tworld_camera.qy: -0.579
+# Tworld_camera.qz:  0.406
+# 俯视15度
+Tworld_camera.qw:  0.430
+Tworld_camera.qx: -0.561
+Tworld_camera.qy: -0.561
+Tworld_camera.qz:  0.430
+#  俯视0度
+# Tworld_camera.qw:  0.500
+# Tworld_camera.qx: -0.500
+# Tworld_camera.qy: -0.500
+# Tworld_camera.qz:  0.500

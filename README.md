@@ -1,5 +1,45 @@
 [DSP与Elliposid整合]
 
+# 重新整合
+  + 在/home/robotlab/work/DSP-SLAM/include/ObjectDetection.h中加入变量,包括bbox
+  + ....
+  + 在Frame.h中的Frame Class加入EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  + 添加UpdateObjectObservation_GenerateEllipsoid和GenerateObservationStructure
+    /home/robotlab/work/DSP-SLAM/include/Tracking.h  中添加 #include <src/config/Config.h>
+  + 在system.cc中添加Config::Init();  在cmakelist target_link_libariries中添加Config
+  + 通过SetObservations, 将std::vector<ObjectDetection*>结构的mvpDetectedObjects 转为 Eigen::MatrixXd结构的mmObservations
+  + 添加InferObjectsWithSemanticPrior(pFrame, false, use_infer_detection); 但注销内部的代码
+  + 在Tracking.h中  #include "core/Plane.h"
+  + 生成预平面 Vector4d(0,0,1,0) ,并加入Map中
+  + 可视化平面,  编写MapDrawer_ellipsoid.cc
+  
+  + 待: 将平面加入optimizer, 很危险,可能涉及g2o和eigen的报错
+
+
+
+
+# 只要在DSP-SLAM-LIB库中,引入ELLIPOSID_LIB,就会报eigen的错误.  说明ELLIPOSID_LIB中程序中,有问题.
+  
+# 之后,将SetObservations合并到GetObjectDetectionsMono
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # 整合DSP与Elliposid中的过程记录
   ## G2O导致的segment fault

@@ -150,6 +150,10 @@ void Viewer::Run()
         mpObjectDrawer->ProcessNewObjects();
         mpObjectDrawer->DrawObjects(bFollow, Tec);
 
+        // [整合]
+        mpMapDrawer->drawPlanes(0); // 0:default.
+
+        // [整合End]
         pangolin::FinishFrame();
 
         cv::Mat im = GetFrame();

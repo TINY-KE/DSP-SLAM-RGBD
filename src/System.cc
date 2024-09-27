@@ -69,6 +69,11 @@ System::System(const string &strVocFile, const string &strSettingsFile, const st
     }
 
 
+    // Initialize global settings.
+    Config::Init();
+    Config::SetParameterFile(strSettingsFile);
+
+    
     //Load ORB Vocabulary
     cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
@@ -117,6 +122,11 @@ System::System(const string &strVocFile, const string &strSettingsFile, const st
     //(it will live in the main thread of execution, the one that called this constructor)
     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
                              mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
+    // 地平面 
+    // SetGroundPlaneMannually(Vector4d(0.00667181,  -0.015002,   0.999865,  0.0274608));
+    mpTracker->SetGroundPlaneMannually(Vector4d(0,  0,   1,  0));
+    mpMap->addPlane(&(mpTracker->mGroundPlane));
+    
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(this, mpMap, mpObjectDrawer, mSensor==MONOCULAR);
