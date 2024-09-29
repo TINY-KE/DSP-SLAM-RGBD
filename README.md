@@ -20,7 +20,7 @@
   + 在optimizer()加入结构函数,并在tracking.cc中mpOptimizer = new Optimizer;
 
 
-# 重新整合3 重构Pri_zhjd.h/cpp，
+# 重新整合3 重构Pri_zhjd.h/cpp，  
   + 加入空壳
   + 加入Pri pri = Pri(1,1);   pri.print();    可以运行，没有报错
   + 加入 priorInfer pi(mRows, mCols, mCalib);
