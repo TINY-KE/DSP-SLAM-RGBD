@@ -36,8 +36,8 @@ namespace ORB_SLAM2 {
             return;
         }
 
-        // Pri pri = Pri(1,1);
-        // pri.print();
+        Pri pri = Pri(1,1);
+        pri.print();
 
         // ********* 测试1： 所有先验都是 1:1:1 *********
         // // 读取 pri;  调试模式从全局 Config 中读取
@@ -45,42 +45,56 @@ namespace ORB_SLAM2 {
         std::cout << "weight:"<<weight << std::endl;
         std::cout << "Begin infering ... " << std::endl;
 
-        // // 对于帧内每个物体，做推断，并可视化新的物体
-        // auto& meas = pFrame->meas;
-        // int meas_num = meas.size();
+        // 对于帧内每个物体，做推断，并可视化新的物体
+        auto& meas = pFrame->meas;
+        int meas_num = meas.size();
 
-        // if(replace_detection) {
-        //     pFrame->mpLocalObjects.clear();
-        //     pFrame->mpLocalObjects.resize(meas_num);
-        // }
-        // for(int i=0;i<meas_num;i++)
-        // {
-        //     Measurement& m = meas[i];
-        //     Vector4d bbox = m.ob_2d.bbox;
+        if(replace_detection) {
+            pFrame->mpLocalObjects.clear();
+            pFrame->mpLocalObjects.resize(meas_num);
+        }
+        for(int i=0;i<meas_num;i++)
+        {
+            Measurement& m = meas[i];
+            Vector4d bbox = m.ob_2d.bbox;
 
-        //     // Check : 确保该物体类型是在地面之上的
-        //     // if(!CheckLabelOnGround(m.ob_2d.label)) continue;
+            // Check : 确保该物体类型是在地面之上的
+            // if(!CheckLabelOnGround(m.ob_2d.label)) continue;
 
-        //     // Check : 该 bbox 不在边缘
-        //     // bool is_border = calibrateMeasurement(bbox, mRows, mCols, Config::Get<int>("Measurement.Border.Pixels"), Config::Get<int>("Measurement.LengthLimit.Pixels"));
-        //     // if(is_border) continue;
+            // Check : 该 bbox 不在边缘
+            // bool is_border = calibrateMeasurement(bbox, mRows, mCols, Config::Get<int>("Measurement.Border.Pixels"), Config::Get<int>("Measurement.LengthLimit.Pixels"));
+            // if(is_border) continue;
 
-        //     // 生成Pri
-        //     Pri pri = Pri(1,1);
+            // 生成Pri
+            Pri pri = Pri(1,1);
 
-        //     std::cout << "Pri for label : " << m.ob_2d.label << std::endl;
-        //     pri.print();
+            std::cout << "Pri for label : " << m.ob_2d.label << std::endl;
+            pri.print();
 
-        //     // RGB_D + Prior
-        //     g2o::plane ground_pl_local = mGroundPlane; ground_pl_local.transform(pFrame->cam_pose_Tcw);
+            // RGB_D + Prior
+            g2o::plane ground_pl_local = mGroundPlane; ground_pl_local.transform(pFrame->cam_pose_Tcw);
 
-        //     priorInfer pi(mRows, mCols, mCalib);
+            priorInfer pi(mRows, mCols, mCalib);
 
-        //     // *********************************
-        //     // 生成一个新的 Initguess
-        //     // *********************************
-        //     g2o::ellipsoid e_init_guess = pi.GenerateInitGuess(bbox, ground_pl_local.param);
-        //     // ------------------------
+            // *********************************
+            // 生成一个新的 Initguess
+            // *********************************
+            std::cout<<"[GenerateInitGuess] 1 准备 初始化一个椭球体"<<std::endl;
+            std::cout << "LastCost: " << pi.GetLastCost() << std::endl;
+            // pi.GenerateInitGuess(bbox, ground_pl_local.param);
+            // g2o::ellipsoid e_init_guess = pi.GenerateInitGuess(bbox, ground_pl_local.param);
+            g2o::ellipsoid e_init_guess; // 获得估计出椭球体的 rpy; 只是将 x,y,z,a,b,c 都设置为0.
+            Eigen::Matrix<double, 10, 1>  e_param;
+            e_param <<     0, 0, 0,   // x y z
+                            0, 0, 0, 0,  // qx qy qz qw
+                            0.5, 0.5, 0.5   // length_a  length_b  length_c
+                        ;
+            std::cout << "e_param: 11:" << e_param.transpose() << std::endl;
+            // e_init_guess.fromVector(e_param);
+            std::cout<<"[GenerateInitGuess] 3 结束 初始化一个椭球体"<<std::endl;
+
+            // g2o::ellipsoid e_init_guess = pi.GenerateInitGuess(bbox, ground_pl_local.param);
+            // ------------------------
 
         //     bool bUsePriInit = false;   // 未开发完成的功能
         //     g2o::ellipsoid e_infer_mono_guess;
@@ -118,9 +132,9 @@ namespace ORB_SLAM2 {
         //     // 可视化bbox的约束平面
         //     // VisualizeConstrainPlanes(e_infer_mono_guess, pFrame->cam_pose_Twc, mpMap); // 中点定在全局坐标系
 
-        // }       
+        }       
 
-        // std::cout << "Finish infering for " << meas_num << " objects..." << std::endl;
+        std::cout << "Finish infering for " << meas_num << " objects..." << std::endl;
         return;
     }
 
@@ -178,6 +192,7 @@ namespace ORB_SLAM2 {
         // [6] 补充调试环节： 测试语义先验对物体的影响
         else
         {
+
             // 将std::vector<ObjectDetection*>结构的mvpDetectedObjects 转为 Eigen::MatrixXd结构的mmObservations
             pFrame->GetObservations_fromKeyFrame(pKF);  
 

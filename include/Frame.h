@@ -23,7 +23,8 @@
 
 #include<vector>
 
-#include "core/Ellipsoid.h"
+// #include "core/Ellipsoid.h"
+#include "ellipsoid/Ellipsoid_zhjd.h"
 #include "MapPoint.h"
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"
 #include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"

@@ -73,52 +73,52 @@ add_library(utils SHARED
 target_link_libraries(utils
 ${OpenCV_LIBS}
 )
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-add_library(ELLIPOSID_LIB SHARED
-        src/core/Ellipsoid.cpp
-        # src/core/Map.cpp
-        # src/core/MapDrawer.cpp
-        # src/core/Viewer.cpp
-        # src/core/Ini/tializer.cpp
-        src/core/Geometry.cpp
-        # src/core/System.cpp
-        # src/core/Tracking.cpp
-        # src/core/FrameDrawer.cpp
-        # src/core/Optimizer.cpp
-        # src/core/Frame.cpp
-        src/core/Plane.cpp
-        # src/core/DataAssociation.cpp
-        src/core/BasicEllipsoidEdges.cpp
-        src/core/NonparamDA.cpp
-        src/core/SupportingPlane.cpp
-        src/core/ConstrainPlane.cpp
-        # src/core/SemanticLabel.cpp
-        src/core/PriorInfer.cpp
-        )
+# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+# add_library(ELLIPOSID_LIB SHARED
+#         src/core/Ellipsoid.cpp
+#         # src/core/Map.cpp
+#         # src/core/MapDrawer.cpp
+#         # src/core/Viewer.cpp
+#         # src/core/Ini/tializer.cpp
+#         src/core/Geometry.cpp
+#         # src/core/System.cpp
+#         # src/core/Tracking.cpp
+#         # src/core/FrameDrawer.cpp
+#         # src/core/Optimizer.cpp
+#         # src/core/Frame.cpp
+#         src/core/Plane.cpp
+#         # src/core/DataAssociation.cpp
+#         src/core/BasicEllipsoidEdges.cpp
+#         src/core/NonparamDA.cpp
+#         src/core/SupportingPlane.cpp
+#         src/core/ConstrainPlane.cpp
+#         # src/core/SemanticLabel.cpp
+#         src/core/PriorInfer.cpp
+#         )
 
-target_link_libraries(ELLIPOSID_LIB
-        ${OpenCV_LIBS}
-        ${EIGEN3_LIBS}
-        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
-        ${Pangolin_LIBRARIES}
-        ${OPENGL_LIBRARIES} 
-        ${GLUT_LIBRARIES}
-        utils
-        Config
-        symmetry
-        EllipsoidExtractor
-        PlaneExtractor
-        dense_builder
-        Polygon
-        Relationship
-        ) 
-# add modules
-add_subdirectory(src/tum_rgbd)
-add_subdirectory(src/dense_builder)
-add_subdirectory(src/symmetry)
+# target_link_libraries(ELLIPOSID_LIB
+#         ${OpenCV_LIBS}
+#         ${EIGEN3_LIBS}
+#         ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+#         ${Pangolin_LIBRARIES}
+#         ${OPENGL_LIBRARIES} 
+#         ${GLUT_LIBRARIES}
+#         utils
+#         Config
+#         symmetry
+#         EllipsoidExtractor
+#         PlaneExtractor
+#         dense_builder
+#         Polygon
+#         Relationship
+#         ) 
+# # add modules
+# add_subdirectory(src/tum_rgbd)
+# add_subdirectory(src/dense_builder)
+# add_subdirectory(src/symmetry)
 add_subdirectory(src/config)
-add_subdirectory(src/pca)
-add_subdirectory(src/plane)
+# add_subdirectory(src/pca)
+# add_subdirectory(src/plane)
 add_subdirectory(src/Polygon)
 add_subdirectory(src/Relationship)
 
@@ -171,8 +171,12 @@ add_library(${PROJECT_NAME} SHARED
         # src/core/PriorInfer.cpp
         # src/core/Ellipsoid.cpp
         # src/core/BasicEllipsoidEdges.cpp
-        # src/core/Geometry.cpp
+        src/core/Geometry.cpp
         # src/core/ConstrainPlane.cpp
+
+        # [整合]将自己的Pri_zhjd一点点迁移进来
+        src/ellipsoid/PriorInfer_zhjd.cpp
+        src/ellipsoid/Ellipsoid_zhjd.cpp
         )
 
 target_link_libraries(${PROJECT_NAME}
@@ -187,7 +191,9 @@ target_link_libraries(${PROJECT_NAME}
         Config
         # PlaneExtractor
         # EllipsoidExtractor
-        # Polygon
+        Polygon
+        utils
+        Relationship
         )
 
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})

@@ -61,13 +61,13 @@ namespace ORB_SLAM2
         return relationType;
     }
 
-    Relations RelationExtractor::ExtractRelations(std::vector<g2o::ellipsoid *> &vpEllips, std::vector<g2o::plane *> &vpPlanes)
+    Relations RelationExtractor::ExtractRelations(std::vector<g2o::ellipsoid_zhjd *> &vpEllips, std::vector<g2o::plane *> &vpPlanes)
     {
         Relations relations;
         int obj_num = vpEllips.size();
         for (int obj_id = 0; obj_id < obj_num; obj_id++)
         {
-            g2o::ellipsoid *pEllip = vpEllips[obj_id];
+            g2o::ellipsoid_zhjd *pEllip = vpEllips[obj_id];
             if(pEllip == NULL ) {
                 // std::cout << "[Relation] NULL ellipsoid." << std::endl;
                 continue;
@@ -100,13 +100,13 @@ namespace ORB_SLAM2
 
     // 新函数，仅仅提取支撑关系
     // 要求传入平面: 满足曼哈顿假设, 且与地平面平行.
-    Relations RelationExtractor::ExtractSupporttingRelations(std::vector<g2o::ellipsoid *> &vpEllips, std::vector<g2o::plane *> &vpPlanes, Frame* pFrame, int model)
+    Relations RelationExtractor::ExtractSupporttingRelations(std::vector<g2o::ellipsoid_zhjd *> &vpEllips, std::vector<g2o::plane *> &vpPlanes, Frame* pFrame, int model)
     {
         Relations relations;
         int obj_num = vpEllips.size();
         for (int obj_id = 0; obj_id < obj_num; obj_id++)
         {
-            g2o::ellipsoid *pEllip = vpEllips[obj_id];
+            g2o::ellipsoid_zhjd *pEllip = vpEllips[obj_id];
             if(pEllip == NULL ) {
                 // std::cout << "[Relation] NULL ellipsoid." << std::endl;
                 continue;
@@ -200,7 +200,7 @@ namespace ORB_SLAM2
         // int plane_instance_id;  // 关联 SupportingPlanes 的 id
         // int plane_id;
         // g2o::plane* pPlane;
-        // g2o::ellipsoid* pEllipsoid;
+        // g2o::ellipsoid_zhjd* pEllipsoid;
         // Frame* pFrame;
         // int type; // 无效关系0, 支撑关系 1, 倚靠关系 2.
 

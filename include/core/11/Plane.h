@@ -6,8 +6,8 @@
 
 #include "include/utils/matrix_utils.h"
 
-// #include "Ellipsoid.h"
-using namespace Eigen;
+#include "Ellipsoid.h"
+
 namespace g2o
 {
 class plane {

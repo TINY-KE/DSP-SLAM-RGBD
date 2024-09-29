@@ -7,9 +7,9 @@
 #include <iostream>
 #include <vector>
 
-#include <include/core/Ellipsoid.h>
+// #include <include/core/Ellipsoid.h>
 #include <include/core/Plane.h>
-
+#include <include/ellipsoid/Ellipsoid_zhjd.h>
 #include <Eigen/Core>
 
 namespace ORB_SLAM2
@@ -25,7 +25,7 @@ namespace ORB_SLAM2
         int plane_instance_id;  // 关联 SupportingPlanes 的 id
         int plane_id;
         g2o::plane* pPlane;
-        g2o::ellipsoid* pEllipsoid;
+        g2o::ellipsoid_zhjd* pEllipsoid;
         Frame* pFrame;
         int type; // 无效关系0, 支撑关系 1, 倚靠关系 2.
 
@@ -41,9 +41,9 @@ namespace ORB_SLAM2
     class RelationExtractor
     {
     public:
-        Relations ExtractRelations(std::vector<g2o::ellipsoid *> &vpEllips, std::vector<g2o::plane *> &vpPlanes);
+        Relations ExtractRelations(std::vector<g2o::ellipsoid_zhjd *> &vpEllips, std::vector<g2o::plane *> &vpPlanes);
 
-        Relations ExtractSupporttingRelations(std::vector<g2o::ellipsoid *> &vpEllips, std::vector<g2o::plane *> &vpPlanes, Frame* pFrame, int model = 1);
+        Relations ExtractSupporttingRelations(std::vector<g2o::ellipsoid_zhjd *> &vpEllips, std::vector<g2o::plane *> &vpPlanes, Frame* pFrame, int model = 1);
 
     };
 

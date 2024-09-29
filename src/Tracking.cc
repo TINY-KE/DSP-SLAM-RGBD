@@ -103,6 +103,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     cout << "- fps: " << fps << endl;
 
 
+
     int nRGB = fSettings["Camera.RGB"];
     mbRGB = nRGB;
 
@@ -156,7 +157,17 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     DetectorConfigFile = fSettings["DetectorConfigPath"].string();
 
     // [整合]
+    int rows = fSettings["Camera.height"];
+    int cols = fSettings["Camera.width"];
+
+    mCalib << fx,  0, cx,
+               0, fy, cy,
+               0,  0,  1;
+
     mpOptimizer = new Optimizer;
+    mRows = rows;
+    mCols = cols;
+
 }
 
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
@@ -484,7 +495,7 @@ void Tracking::Track()
             // 只在关键帧中进行物体检测
             if(NeedNewKeyFrame())
             {
-                cout << "New Keyframe" << endl;
+                cout << "New Keyframe Debug" << endl;
                 CreateNewKeyFrame();
             }
 
@@ -1131,6 +1142,8 @@ void Tracking::CreateNewKeyFrame()
     if(!mpLocalMapper->SetNotStop(true))
         return;
 
+    std::cout<<"[UpdateObjectObservation_GenerateEllipsoid] -1"<<std::endl;
+
     KeyFrame* pKF = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
 
     if (mSensor == System::STEREO)
@@ -1157,7 +1170,9 @@ void Tracking::CreateNewKeyFrame()
         // 是否直接使用物体检测中的InstanceID
         // bool withAssociation = true;
         bool withAssociation = false;
-        // UpdateObjectObservation_GenerateEllipsoid( &mCurrentFrame, pKF, withAssociation);
+        std::cout<<"[UpdateObjectObservation_GenerateEllipsoid] 0"<<std::endl;
+        
+        UpdateObjectObservation_GenerateEllipsoid( &mCurrentFrame, pKF, withAssociation);
 
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 

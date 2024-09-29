@@ -13,13 +13,38 @@
   + 生成预平面 Vector4d(0,0,1,0) ,并加入Map中
   + 可视化平面,  编写MapDrawer_ellipsoid.cc
 
-# 重新整合2  
+# 重新整合2  commit 61a0f1a43df3c11d788cd00420809ff8d140dace 
   + 
   + 在tracking中, 加入 #include "Optimizer.h"和class Optimizer, 同时去除OptimizeEssentialGraph行参中的LocalMapping前缀
   + 将平面加入optimizer, 很危险,可能涉及g2o和eigen的报错
   + 在optimizer()加入结构函数,并在tracking.cc中mpOptimizer = new Optimizer;
-  + 在三方库中,加入EllipsoidExtractor.  并在Tracking::InferObjectsWithSemanticPrior()中 生成 Pri和PriorInfer
+
+
+# 重新整合3 重构Pri_zhjd.h/cpp，
+  + 加入空壳
+  + 加入Pri pri = Pri(1,1);   pri.print();    可以运行，没有报错
+  + 加入 priorInfer pi(mRows, mCols, mCalib);
+  + 加入pi.GetLastCost()，测试priorInfer
+  + [一导入就出错，这怎么解决？] 加入 内部为空壳的GenerateInitGuess.   ！！！！报错
+     原来是没有导入src/core/Ellipsoid.cpp 和 utils库
+  + 导入src/core/Ellipsoid.cpp 和 utils库    编译报错. 原来是Ellipsoid.cpp 中关联了ConstrainPlane
+  + 重构自己的 ellipsoid/Ellipsoid_zhjd.cpp， 删除掉ConstrainPlane和Plane。 ·注意到导入了Polygon库」
   + 
+  + 测试空壳GenerateInitGuess
+    utils
+  + 手动初始化一个椭球体，在viewer中可视化
+  + 
+  + 
+
+
+
+  + 待:  在三方库中,加入EllipsoidExtractor.  并在Tracking::InferObjectsWithSemanticPrior()中 生成 Pri和PriorInfer.
+  这真的会导致问题.  
+  现在能想到的解决方法是,  不再整体导入文件,而是 一个函数、一个头文件的导入。
+  + 
+
+
+
 
 
   + 待: void LocalMapping::SetOptimizer(Optimizer* optimizer)

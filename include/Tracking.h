@@ -47,6 +47,7 @@
 #include "core/Plane.h"
 #include "Optimizer.h"
 // #include "include/core/PriorInfer.h"
+#include "include/ellipsoid/PriorInfer_zhjd.h"
 
 namespace ORB_SLAM2
 {
@@ -64,6 +65,8 @@ class Tracking
 {  
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Map* pMap,
              KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
 
@@ -269,6 +272,12 @@ public:
     // PlaneExtractorManhattan* pPlaneExtractorManhattan;
 
     Optimizer* mpOptimizer;
+
+    int mRows;
+    int mCols;
+
+    Eigen::Matrix3d mCalib;
+
 };
 
 } //namespace ORB_SLAM
