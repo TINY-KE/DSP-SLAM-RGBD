@@ -21,6 +21,7 @@
   + 在三方库中,加入EllipsoidExtractor.  并在Tracking::InferObjectsWithSemanticPrior()中 生成 Pri和PriorInfer
   + 
 
+# 重新整合3
 
   + 待: void LocalMapping::SetOptimizer(Optimizer* optimizer)
     {
